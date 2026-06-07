@@ -1,0 +1,334 @@
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Github, ChevronLeft, ChevronRight } from 'lucide-react'
+
+export interface ProjectDetail {
+  id: number
+  title: string
+  year: string
+  description: string
+  problem: string
+  solution: string
+  tags: string[]
+  link: string | null
+  hasVideo: boolean
+  videoId?: string
+  screenshots: string[]
+  isMobile?: boolean
+  metrics?: { label: string; value: string }[]
+}
+
+function EmptyScreenshots() {
+  return (
+    <div className="flex h-48 w-full items-center justify-center rounded-xl border border-white/10 bg-[#111] font-mono text-xs text-white/25">
+      Sin screenshots disponibles
+    </div>
+  )
+}
+
+function MobileCarousel({ screenshots }: { screenshots: string[] }) {
+  const [current, setCurrent] = useState(0)
+  const count = screenshots.length
+
+  useEffect(() => {
+    setCurrent(0)
+  }, [screenshots])
+
+  if (count === 0) return <EmptyScreenshots />
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-4">
+      <div className="relative h-[400px] w-[200px]">
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] border-[6px] border-white/20 bg-[#111] shadow-2xl">
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={current}
+              src={screenshots[current]}
+              alt=""
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.22 }}
+              className="h-full w-full object-cover"
+            />
+          </AnimatePresence>
+        </div>
+        <div className="absolute left-1/2 top-3 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-[#080808]" />
+      </div>
+
+      {count > 1 && (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setCurrent((index) => (index - 1 + count) % count)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
+            aria-label="Screenshot anterior"
+          >
+            <ChevronLeft size={15} />
+          </button>
+          <div className="flex gap-1.5">
+            {screenshots.map((screenshot, index) => (
+              <button
+                key={screenshot}
+                type="button"
+                onClick={() => setCurrent(index)}
+                className={`rounded-full transition-all duration-200 ${
+                  index === current
+                    ? 'h-1.5 w-5 bg-white'
+                    : 'h-1.5 w-1.5 bg-white/20 hover:bg-white/40'
+                }`}
+                aria-label={`Ver screenshot ${index + 1}`}
+                aria-current={index === current}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setCurrent((index) => (index + 1) % count)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
+            aria-label="Screenshot siguiente"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
+  const [current, setCurrent] = useState(0)
+  const count = screenshots.length
+
+  useEffect(() => {
+    setCurrent(0)
+  }, [screenshots])
+
+  if (count === 0) return <EmptyScreenshots />
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center gap-1.5 rounded-t-xl border-b border-white/5 bg-[#1a1a1a] px-4 py-2.5">
+        <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+        <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
+        <div className="h-3 w-3 rounded-full bg-[#28c840]" />
+        <div className="mx-3 flex h-5 flex-1 items-center justify-center rounded bg-[#111]">
+          <span className="font-mono text-[9px] text-white/15">localhost</span>
+        </div>
+      </div>
+
+      <div className="relative overflow-hidden rounded-b-xl border border-t-0 border-white/10 bg-[#111]">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={current}
+            src={screenshots[current]}
+            alt=""
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.22 }}
+            className="max-h-[260px] w-full object-cover"
+          />
+        </AnimatePresence>
+
+        {count > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setCurrent((index) => (index - 1 + count) % count)}
+              className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-all hover:bg-black/80"
+              aria-label="Screenshot anterior"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrent((index) => (index + 1) % count)}
+              className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-all hover:bg-black/80"
+              aria-label="Screenshot siguiente"
+            >
+              <ChevronRight size={16} />
+            </button>
+            <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {screenshots.map((screenshot, index) => (
+                <button
+                  key={screenshot}
+                  type="button"
+                  onClick={() => setCurrent(index)}
+                  className={`rounded-full transition-all duration-200 ${
+                    index === current
+                      ? 'h-1.5 w-5 bg-white'
+                      : 'h-1.5 w-1.5 bg-white/40 hover:bg-white/60'
+                  }`}
+                  aria-label={`Ver screenshot ${index + 1}`}
+                  aria-current={index === current}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function ProjectModal({
+  project,
+  onClose,
+}: {
+  project: ProjectDetail | null
+  onClose: () => void
+}) {
+  useEffect(() => {
+    if (!project) return undefined
+
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [project, onClose])
+
+  return (
+    <AnimatePresence>
+      {project && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="project-modal-title"
+        >
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+
+          <motion.div
+            initial={{ scale: 0.94, opacity: 0, y: 16 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.94, opacity: 0, y: 16 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            className="relative z-10 w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0f0f0f] shadow-2xl"
+            style={{ maxHeight: '90vh' }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/40 transition-all hover:bg-white/10 hover:text-white"
+              aria-label="Cerrar modal"
+            >
+              <X size={15} />
+            </button>
+
+            <div className="flex flex-col overflow-auto md:flex-row" style={{ maxHeight: '90vh' }}>
+              <div className="flex min-h-[260px] items-center justify-center bg-[#080808] p-5 md:w-[45%]">
+                {project.hasVideo && project.videoId ? (
+                  <div className="aspect-video w-full overflow-hidden rounded-xl">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${project.videoId}?autoplay=1&mute=1&loop=1&playlist=${project.videoId}&controls=1&rel=0&modestbranding=1`}
+                      className="h-full w-full"
+                      title={`Video de ${project.title}`}
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : project.isMobile ? (
+                  <MobileCarousel screenshots={project.screenshots} />
+                ) : (
+                  <DesktopCarousel screenshots={project.screenshots} />
+                )}
+              </div>
+
+              <div className="p-6 md:w-[55%]">
+                <p className="mb-1 font-mono text-xs text-white/25">{project.year}</p>
+                <h2 id="project-modal-title" className="mb-2 font-display text-2xl font-bold text-white">
+                  {project.title}
+                </h2>
+                <p className="mb-4 font-body text-sm leading-relaxed text-white/55">
+                  {project.description}
+                </p>
+
+                {project.metrics && (
+                  <div className="mb-4 grid grid-cols-3 gap-2">
+                    {project.metrics.map((metric) => (
+                      <div
+                        key={metric.label}
+                        className="rounded-lg border border-white/5 bg-white/5 p-3 text-center"
+                      >
+                        <p className="font-display text-lg font-bold text-white">{metric.value}</p>
+                        <p className="mt-0.5 font-mono text-[10px] text-white/25">
+                          {metric.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mb-4 space-y-3">
+                  <div>
+                    <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-white/25">
+                      Problema_
+                    </p>
+                    <p className="font-body text-sm leading-relaxed text-white/50">
+                      {project.problem}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-white/25">
+                      Solución_
+                    </p>
+                    <p className="font-body text-sm leading-relaxed text-white/50">
+                      {project.solution}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mb-5">
+                  <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-white/25">
+                    Tech Stack_
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-xs text-white/45"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {project.link ? (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-sm font-semibold text-[#0a0a0a] transition-colors hover:bg-white/90"
+                    >
+                      <Github size={14} />
+                      Ver código
+                    </a>
+                  ) : (
+                    <span className="font-mono text-xs italic text-white/20">
+                      Repositorio privado
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
