@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, GraduationCap } from 'lucide-react'
 import { OWNER, STATS } from '@/data/portfolio'
+
+const BlackHoleScene = lazy(() => import('@/components/BlackHoleScene'))
 
 function CounterStat({ value, label }: { value: string; label: string }) {
   const [visible, setVisible] = useState(false)
@@ -35,7 +37,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="py-24 sm:py-32 px-6"
+      className="px-6 pb-12 pt-24 sm:pb-16 sm:pt-32"
       style={{ position: 'relative', zIndex: 'auto' }}
     >
       <div className="relative z-10 max-w-4xl mx-auto">
@@ -96,12 +98,42 @@ export default function About() {
             </div>
           </div>
 
+          {/* ── Black Hole Interactive Section ── */}
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 mb-16">
             {STATS.map((stat) => (
               <CounterStat key={stat.label} value={stat.value} label={stat.label} />
             ))}
           </div>
+
+          <div className="relative left-1/2 mb-0 w-[calc(100vw-3rem)] max-w-7xl -translate-x-1/2">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex-1 h-px bg-white/[0.06]" />
+              <p className="font-mono text-[10px] text-white/25 uppercase tracking-widest">
+                universo personal
+              </p>
+              <div className="flex-1 h-px bg-white/[0.06]" />
+            </div>
+
+            <div
+              className="relative w-full rounded-2xl overflow-hidden border border-white/[0.06]"
+              style={{ background: 'radial-gradient(ellipse at center, #0a0805 0%, #050505 60%, #000000 100%)' }}
+            >
+              <Suspense
+                fallback={
+                  <div className="h-[640px] flex items-center justify-center">
+                    <span className="font-mono text-xs text-white/20 animate-pulse">
+                      initializing black hole…
+                    </span>
+                  </div>
+                }
+              >
+                <BlackHoleScene />
+              </Suspense>
+            </div>
+
+          </div>
+
         </motion.div>
       </div>
     </section>

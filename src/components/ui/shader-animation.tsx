@@ -58,17 +58,17 @@ const fragmentShaderSource = `
     // Mouse interaction
     glow += smoothstep(0.3, 0.0, mouseDist) * 0.15;
     
-    // Color: verde oscuro -> verde medio, sin particulas
-    vec3 darkGreen = vec3(0.0, 0.08, 0.04);
-    vec3 midGreen = vec3(0.0, 0.35, 0.15);
-    vec3 brightGreen = vec3(0.0, 0.6, 0.25);
+    // Color: gris profundo -> plata -> blanco neon
+    vec3 darkSilver = vec3(0.025, 0.03, 0.035);
+    vec3 midSilver = vec3(0.38, 0.42, 0.46);
+    vec3 brightSilver = vec3(0.88, 0.95, 1.0);
     
-    vec3 col = darkGreen;
-    col = mix(col, midGreen, glow * 0.8);
-    col = mix(col, brightGreen, pow(glow, 3.0) * 0.6);
+    vec3 col = darkSilver;
+    col = mix(col, midSilver, glow * 0.8);
+    col = mix(col, brightSilver, pow(glow, 3.0) * 0.75);
     
     // Fondo muy oscuro
-    col = mix(vec3(0.02, 0.03, 0.02), col, glow * 1.2 + 0.05);
+    col = mix(vec3(0.015, 0.016, 0.018), col, glow * 1.25 + 0.05);
     
     gl_FragColor = vec4(col, 1.0);
   }
