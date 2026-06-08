@@ -1,33 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Bot, Sparkles } from 'lucide-react'
-import portfolioContext from '../../portfolio-context.md?raw'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
-}
-
-const GEMINI_MODEL = 'gemini-3.5-flash'
-
-const SYSTEM_CONTEXT = `${portfolioContext}
-
-Instrucción operativa:
-- Responde como asistente del portafolio de Lázaro.
-- Sé conciso, útil y técnico.
-- No inventes datos fuera del contexto.
-- Si la pregunta es casual, responde natural y redirige hacia el perfil, proyectos o stack de Lázaro.`
-
-interface GeminiResponse {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{ text?: string }>
-    }
-    finishReason?: string
-  }>
-  error?: {
-    message?: string
-  }
 }
 
 function normalizeText(value: string) {
@@ -45,7 +22,7 @@ function getLocalPortfolioAnswer(question: string) {
   const q = normalizeText(question)
 
   if (hasAny(q, ['hola', 'buenas', 'hey', 'que onda', 'saludos'])) {
-    return '¡Qué onda! Soy el asistente del portafolio de Lázaro. Puedo contarte sobre su perfil, proyectos, stack técnico, experiencia, el diseño del sitio o la simulación del blackhole.'
+    return '¡Qué onda! Soy el asistente del portafolio de Lázaro. Pregúntame por sus proyectos, stack, experiencia, contacto o cómo está hecho este sitio.'
   }
 
   if (hasAny(q, ['contacto', 'correo', 'email', 'telefono', 'linkedin', 'github'])) {
@@ -59,7 +36,15 @@ function getLocalPortfolioAnswer(question: string) {
   }
 
   if (hasAny(q, ['quien', 'perfil', 'lazaro', 'zaro', 'sobre el', 'sobre mi'])) {
-    return 'Lázaro Daniel Díaz Bojórquez, alias zaro, es Full Stack Engineer / Frontend Specialist y estudiante de 6° semestre de Ingeniería en Ciencias de la Computación en UVG. Su enfoque está en frontend engineering, UI/UX premium, arquitectura escalable, bases de datos, WebGL y desarrollo full stack con criterio técnico.'
+    return [
+      'Lázaro Daniel Díaz Bojórquez, alias zaro, es Full Stack Engineer / Frontend Specialist.',
+      '',
+      'Qué hace:',
+      '- Construye apps full stack con React, Vue, Node.js y PostgreSQL.',
+      '- Le interesa el frontend engineering, UI/UX premium y arquitectura escalable.',
+      '- También trabaja con Kotlin, Go, Docker, CI/CD, APIs de IA y WebGL.',
+      '- Estudia 6° semestre de Ingeniería en Ciencias de la Computación en UVG.',
+    ].join('\n')
   }
 
   if (hasAny(q, ['stack', 'tecnologias', 'habilidades', 'skills'])) {
@@ -93,6 +78,8 @@ function getLocalPortfolioAnswer(question: string) {
       '- MoodNutri: app Android con Kotlin, Jetpack Compose, Gemini API y OpenAI API.',
       '- Series Tracker: API REST en Go, SQLite, Swagger/OpenAPI y Docker/Railway.',
       '- RetailMax: dashboard analítico con PostgreSQL, Metabase, Docker y KPIs de negocio.',
+      '',
+      'El más fuerte para mostrar ingeniería completa es Bodega de Licores; el más fuerte para datos es OmniMarket/RetailMax.',
     ].join('\n')
   }
 
@@ -132,7 +119,7 @@ export default function GeminiChat() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: '¡Hola! Soy el asistente de Lázaro. ¿Qué te gustaría saber sobre él o su trabajo?',
+      content: '¡Hola! Soy el asistente de Lázaro. Pregúntame por sus proyectos, stack, experiencia o contacto.',
     },
   ])
   const [input, setInput] = useState('')
@@ -144,73 +131,17 @@ export default function GeminiChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!input.trim() || loading) return
     const userMessage = input.trim()
-    const fallbackAnswer = getLocalPortfolioAnswer(userMessage)
+    const answer = getLocalPortfolioAnswer(userMessage)
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
-    
-    try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY
-
-      if (!apiKey) {
-        setMessages(prev => [...prev, { role: 'assistant', content: fallbackAnswer }])
-        return
-      }
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: JSON.stringify({
-            contents: [{
-              role: 'user',
-              parts: [{
-                text: [
-                  SYSTEM_CONTEXT,
-                  '',
-                  'Pregunta del usuario:',
-                  userMessage,
-                  '',
-                  'Responde en máximo 5 bullets o 2 párrafos cortos.',
-                ].join('\n'),
-              }],
-            }],
-            generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
-          }),
-        }
-      )
-
-      const data = await response.json() as GeminiResponse
-      const text = data.candidates
-        ?.flatMap(candidate => candidate.content?.parts ?? [])
-        .map(part => part.text ?? '')
-        .join('')
-        .trim()
-
-      if (!response.ok || !text) {
-        if (data.error?.message) {
-          console.warn('Gemini API fallback:', data.error.message)
-        }
-        setMessages(prev => [...prev, { role: 'assistant', content: fallbackAnswer }])
-        return
-      }
-
-      setMessages(prev => [...prev, { role: 'assistant', content: text }])
-    } catch {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: fallbackAnswer,
-      }])
-    } finally {
+    window.setTimeout(() => {
+      setMessages(prev => [...prev, { role: 'assistant', content: answer }])
       setLoading(false)
-    }
+    }, 120)
   }
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -262,7 +193,7 @@ export default function GeminiChat() {
                     Asistente de Lázaro
                   </p>
                   <p className="font-mono text-[10px] text-white/30 leading-tight">
-                    Powered by Gemini
+                    Respuestas rápidas del portafolio
                   </p>
                 </div>
               </div>
@@ -278,7 +209,7 @@ export default function GeminiChat() {
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm font-body leading-relaxed ${
+                  <div className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-4 py-2.5 text-sm font-body leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-white text-[#0a0a0a] rounded-br-sm'
                       : 'bg-white/5 text-white/80 border border-white/10 rounded-bl-sm'
