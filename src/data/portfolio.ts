@@ -24,14 +24,10 @@ export const HERO_TEXTS = [
   'React & TypeScript',
   'Node.js & PostgreSQL',
   'Clean Architecture',
-  'API Designer',
   'Docker & CI/CD',
-  'UX-Driven Dev',
-  'Go Developer',
+  'Go',
   'Android & Kotlin',
-  'Siempre aprendiendo',
-  'Apasionado por código',
-  'Builder mindset',
+  'Builder',
 ]
 
 export const STATS = [
