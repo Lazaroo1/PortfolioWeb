@@ -97,6 +97,7 @@ export default function GeminiChat() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
             className="fixed bottom-24 sm:bottom-8 right-6 z-50 w-14 h-14 rounded-full bg-white text-[#0a0a0a] shadow-2xl flex items-center justify-center"
+            style={{ pointerEvents: 'all' }}
             aria-label="Abrir chat"
           >
             <Bot size={22} />

@@ -191,7 +191,7 @@ export default function ShaderAnimation() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
+      className="fixed inset-0 w-full h-full"
       style={{ zIndex: -1, pointerEvents: 'none' }}
     />
   )

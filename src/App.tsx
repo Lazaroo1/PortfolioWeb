@@ -38,7 +38,7 @@ export default function App() {
       <NavBar activeSection={activeSection} />
 
       {/* Main content */}
-      <main style={{ position: 'relative', zIndex: 1 }}>
+      <main style={{ position: 'relative', zIndex: 1, isolation: 'isolate' }}>
         <Hero />
         <About />
         <Projects />

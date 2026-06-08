@@ -17,17 +17,17 @@ export default function Hero() {
   }
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
-    >
-      {/* Background shader — lazy loaded */}
+    <>
       <Suspense fallback={null}>
         <ShaderAnimation />
       </Suspense>
 
-      {/* Dark overlay para legibilidad */}
-      <div className="absolute inset-0 z-0 bg-[#0a0a0a]/60 pointer-events-none" />
+      <section
+        id="hero"
+        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      >
+        {/* Dark overlay para legibilidad */}
+        <div className="absolute inset-0 z-0 bg-[#0a0a0a]/60 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 w-full text-center px-6 max-w-[22rem] sm:max-w-4xl mx-auto">
@@ -99,13 +99,15 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
-          className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="relative z-20 flex flex-col sm:flex-row gap-4 justify-center items-center"
+          style={{ position: 'relative' }}
         >
           <button
             onClick={() => {
               const el = document.getElementById('projects')
               if (el) el.scrollIntoView({ behavior: 'smooth' })
             }}
+            style={{ position: 'relative', zIndex: 30 }}
             className="inline-flex items-center gap-2 bg-white text-[#0a0a0a] font-display font-bold text-sm px-8 py-3 rounded-full hover:bg-white/90 transition-colors cursor-pointer"
           >
             Ver proyectos
@@ -113,6 +115,9 @@ export default function Hero() {
           <a
             href="/PortfolioWeb/lazaro-cv.pdf"
             download="Lazaro-Diaz-CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ position: 'relative', zIndex: 30 }}
             className="inline-flex items-center gap-2 border border-white/20 text-white font-display text-sm px-8 py-3 rounded-full hover:border-white/50 hover:text-white transition-colors"
           >
             <Download size={15} />
@@ -132,6 +137,7 @@ export default function Hero() {
       >
         <ArrowDown size={20} className="animate-bounce" />
       </motion.button>
-    </section>
+      </section>
+    </>
   )
 }
