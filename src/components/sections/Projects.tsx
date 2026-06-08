@@ -129,7 +129,8 @@ export default function Projects() {
   const selectedProject = PROJECTS_DATA.find((project) => project.id === selectedId) ?? null
 
   return (
-    <section id="projects" className="relative z-10 bg-[#0a0a0a]">
+    <section id="projects" className="relative z-10">
+      <div className="absolute inset-0 bg-[#0a0a0a]/60 pointer-events-none -z-10" />
       <div className="mx-auto max-w-4xl px-6 py-24">
         <motion.div
           initial={{ opacity: 0, y: 24 }}

@@ -36,9 +36,9 @@ export default function About() {
     <section
       id="about"
       className="py-24 sm:py-32 px-6"
-      style={{ position: 'relative', zIndex: 10 }}
+      style={{ position: 'relative', zIndex: 'auto' }}
     >
-      <div className="absolute inset-0 bg-[#0a0a0a]/75 -z-10" />
+      <div className="absolute inset-0 bg-[#0a0a0a]/55 -z-10 pointer-events-none" />
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 32 }}

@@ -19,7 +19,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative isolate min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
     >
       {/* Background shader — lazy loaded */}
       <Suspense fallback={null}>
@@ -27,7 +27,7 @@ export default function Hero() {
       </Suspense>
 
       {/* Dark overlay para legibilidad */}
-      <div className="absolute inset-0 bg-[#0a0a0a]/60 z-[1] pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-[#0a0a0a]/60 pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 w-full text-center px-6 max-w-[22rem] sm:max-w-4xl mx-auto">
@@ -99,22 +99,21 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.0 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <a
-            href="#projects"
-            onClick={(e) => {
-              e.preventDefault()
-              document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
+          <button
+            onClick={() => {
+              const el = document.getElementById('projects')
+              if (el) el.scrollIntoView({ behavior: 'smooth' })
             }}
-            className="inline-flex items-center gap-2 bg-white text-[#0a0a0a] font-display font-bold text-sm px-8 py-3 rounded-full hover:bg-[#e8e8e8] transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-[#0a0a0a] font-display font-bold text-sm px-8 py-3 rounded-full hover:bg-white/90 transition-colors cursor-pointer"
           >
             Ver proyectos
-          </a>
+          </button>
           <a
-            href={OWNER.cvUrl}
-            download
-            className="inline-flex items-center gap-2 border border-[#1f1f1f] text-[#e8e8e8] font-display text-sm px-8 py-3 rounded-full hover:border-white/50 hover:text-white transition-colors"
+            href="/PortfolioWeb/lazaro-cv.pdf"
+            download="Lazaro-Diaz-CV.pdf"
+            className="inline-flex items-center gap-2 border border-white/20 text-white font-display text-sm px-8 py-3 rounded-full hover:border-white/50 hover:text-white transition-colors"
           >
             <Download size={15} />
             Descargar CV

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Github, ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -49,6 +50,7 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.22 }}
+              loading={current === 0 ? 'eager' : 'lazy'}
               className="h-full w-full object-cover"
             />
           </AnimatePresence>
@@ -60,7 +62,9 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setCurrent((index) => (index - 1 + count) % count)}
+            onClick={() =>
+              setCurrent((prev) => (prev - 1 + screenshots.length) % screenshots.length)
+            }
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
             aria-label="Screenshot anterior"
           >
@@ -84,7 +88,7 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
           </div>
           <button
             type="button"
-            onClick={() => setCurrent((index) => (index + 1) % count)}
+            onClick={() => setCurrent((prev) => (prev + 1) % screenshots.length)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
             aria-label="Screenshot siguiente"
           >
@@ -127,6 +131,7 @@ function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.22 }}
+            loading={current === 0 ? 'eager' : 'lazy'}
             className="max-h-[260px] w-full object-cover"
           />
         </AnimatePresence>
@@ -135,7 +140,9 @@ function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
           <>
             <button
               type="button"
-              onClick={() => setCurrent((index) => (index - 1 + count) % count)}
+              onClick={() =>
+                setCurrent((prev) => (prev - 1 + screenshots.length) % screenshots.length)
+              }
               className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-all hover:bg-black/80"
               aria-label="Screenshot anterior"
             >
@@ -143,7 +150,7 @@ function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
             </button>
             <button
               type="button"
-              onClick={() => setCurrent((index) => (index + 1) % count)}
+              onClick={() => setCurrent((prev) => (prev + 1) % screenshots.length)}
               className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-all hover:bg-black/80"
               aria-label="Screenshot siguiente"
             >
@@ -195,7 +202,7 @@ export default function ProjectModal({
     }
   }, [project, onClose])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {project && (
         <motion.div
@@ -233,8 +240,9 @@ export default function ProjectModal({
                 {project.hasVideo && project.videoId ? (
                   <div className="aspect-video w-full overflow-hidden rounded-xl">
                     <iframe
-                      src={`https://www.youtube.com/embed/${project.videoId}?autoplay=1&mute=1&loop=1&playlist=${project.videoId}&controls=1&rel=0&modestbranding=1`}
+                      src={`https://www.youtube.com/embed/${project.videoId}?autoplay=1&mute=1&loop=1&playlist=${project.videoId}&controls=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&disablekb=1`}
                       className="h-full w-full"
+                      style={{ pointerEvents: 'none' }}
                       title={`Video de ${project.title}`}
                       allow="autoplay; encrypted-media"
                       allowFullScreen
@@ -313,7 +321,7 @@ export default function ProjectModal({
                       href={project.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-sm font-semibold text-[#0a0a0a] transition-colors hover:bg-white/90"
+                      className="relative z-10 flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-display text-sm font-semibold text-[#0a0a0a] transition-colors hover:bg-white/90"
                     >
                       <Github size={14} />
                       Ver código
@@ -329,6 +337,7 @@ export default function ProjectModal({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }

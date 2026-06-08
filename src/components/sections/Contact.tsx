@@ -7,18 +7,29 @@ export default function Contact() {
   const [copied, setCopied] = useState(false)
 
   const copyEmail = async () => {
-    await navigator.clipboard.writeText(OWNER.email)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText('ldbojorquez@gmail.com')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      const el = document.createElement('textarea')
+      el.value = 'ldbojorquez@gmail.com'
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   return (
     <section
       id="contact"
       className="py-24 sm:py-32 px-6"
-      style={{ position: 'relative', zIndex: 10 }}
+      style={{ position: 'relative', zIndex: 'auto' }}
     >
-      <div className="absolute inset-0 bg-[#0a0a0a]/75 -z-10" />
+      <div className="absolute inset-0 bg-[#0a0a0a]/65 -z-10 pointer-events-none" />
       <div className="max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
@@ -53,19 +64,19 @@ export default function Contact() {
           {/* Links */}
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href={OWNER.github}
+              href="https://github.com/Lazaroo1"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 font-display text-sm text-[#666] hover:text-[#e8e8e8] border border-[#1f1f1f] hover:border-[#333] px-5 py-2.5 rounded-full transition-colors"
+              className="flex items-center gap-2 font-display text-sm text-white/60 hover:text-white border border-white/10 hover:border-white/30 px-5 py-2.5 rounded-full transition-colors"
             >
               <Github size={15} />
               GitHub
             </a>
             <a
-              href={OWNER.linkedin}
+              href="https://www.linkedin.com/in/lazaro-diaz-146b5b39a"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 font-display text-sm text-[#666] hover:text-[#e8e8e8] border border-[#1f1f1f] hover:border-[#333] px-5 py-2.5 rounded-full transition-colors"
+              className="flex items-center gap-2 font-display text-sm text-white/60 hover:text-white border border-white/10 hover:border-white/30 px-5 py-2.5 rounded-full transition-colors"
             >
               <Linkedin size={15} />
               LinkedIn
