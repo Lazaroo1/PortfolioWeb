@@ -23,7 +23,15 @@ export const HERO_TEXTS = [
   'Full Stack Engineer',
   'React & TypeScript',
   'Node.js & PostgreSQL',
-  'Builder',
+  'Clean Architecture',
+  'API Designer',
+  'Docker & CI/CD',
+  'UX-Driven Dev',
+  'Go Developer',
+  'Android & Kotlin',
+  'Siempre aprendiendo',
+  'Apasionado por código',
+  'Builder mindset',
 ]
 
 export const STATS = [

@@ -26,9 +26,6 @@ export default function Hero() {
         id="hero"
         className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
       >
-        {/* Dark overlay para legibilidad */}
-        <div className="absolute inset-0 z-0 bg-[#0a0a0a]/60 pointer-events-none" />
-
       {/* Content */}
       <div className="relative z-10 w-full text-center px-6 max-w-[22rem] sm:max-w-4xl mx-auto">
         {/* Chip de disponibilidad */}

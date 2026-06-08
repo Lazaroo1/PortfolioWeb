@@ -13,7 +13,6 @@ export interface ProjectDetail {
   tags: string[]
   link: string | null
   hasVideo: boolean
-  videoId?: string
   screenshots: string[]
   isMobile?: boolean
   metrics?: { label: string; value: string }[]
@@ -39,8 +38,11 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
 
   return (
     <div className="flex flex-col items-center gap-4 py-4">
-      <div className="relative h-[400px] w-[200px]">
-        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] border-[6px] border-white/20 bg-[#111] shadow-2xl">
+      <div className="relative h-[480px] w-[235px] rounded-[28px] border border-[#333] bg-[#1a1a1a] p-[7px] shadow-2xl">
+        <div className="absolute right-[-5px] top-[150px] h-[60px] w-1 rounded-full bg-[#444]" />
+        <div className="absolute left-[-5px] top-[120px] h-[45px] w-1 rounded-full bg-[#444]" />
+        <div className="absolute left-[-5px] top-[173px] h-[45px] w-1 rounded-full bg-[#444]" />
+        <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-black">
           <AnimatePresence mode="wait">
             <motion.img
               key={current}
@@ -54,8 +56,8 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
               className="h-full w-full object-cover"
             />
           </AnimatePresence>
+          <div className="absolute left-1/2 top-[14px] z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[#0a0a0a]" />
         </div>
-        <div className="absolute left-1/2 top-3 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-[#080808]" />
       </div>
 
       {count > 1 && (
@@ -132,7 +134,7 @@ function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.22 }}
             loading={current === 0 ? 'eager' : 'lazy'}
-            className="max-h-[260px] w-full object-cover"
+            className="max-h-[380px] w-full object-cover"
           />
         </AnimatePresence>
 
@@ -182,15 +184,28 @@ function DesktopCarousel({ screenshots }: { screenshots: string[] }) {
 export default function ProjectModal({
   project,
   onClose,
+  projectList,
+  currentIndex,
+  onPrev,
+  onNext,
 }: {
   project: ProjectDetail | null
   onClose: () => void
+  projectList: ProjectDetail[]
+  currentIndex: number
+  onPrev: () => void
+  onNext: () => void
 }) {
+  const canGoPrev = currentIndex > 0
+  const canGoNext = currentIndex < projectList.length - 1
+
   useEffect(() => {
     if (!project) return undefined
 
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose()
+      if (event.key === 'ArrowLeft' && canGoPrev) onPrev()
+      if (event.key === 'ArrowRight' && canGoNext) onNext()
     }
 
     document.addEventListener('keydown', handleKey)
@@ -200,7 +215,7 @@ export default function ProjectModal({
       document.removeEventListener('keydown', handleKey)
       document.body.style.overflow = ''
     }
-  }, [project, onClose])
+  }, [project, onClose, canGoPrev, canGoNext, onPrev, onNext])
 
   return createPortal(
     <AnimatePresence>
@@ -222,10 +237,30 @@ export default function ProjectModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.94, opacity: 0, y: 16 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative z-10 w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0f0f0f] shadow-2xl"
+            className="relative z-10 w-full max-w-7xl overflow-hidden rounded-xl border border-white/10 bg-[#0f0f0f] shadow-2xl"
             style={{ maxHeight: '90vh' }}
             onClick={(event) => event.stopPropagation()}
           >
+            <div className="absolute right-14 top-4 z-20 flex gap-1">
+              <button
+                type="button"
+                onClick={onPrev}
+                disabled={!canGoPrev}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/15 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
+                aria-label="Proyecto anterior"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={onNext}
+                disabled={!canGoNext}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/15 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
+                aria-label="Proyecto siguiente"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
             <button
               type="button"
               onClick={onClose}
@@ -236,16 +271,17 @@ export default function ProjectModal({
             </button>
 
             <div className="flex flex-col overflow-auto md:flex-row" style={{ maxHeight: '90vh' }}>
-              <div className="flex min-h-[260px] items-center justify-center bg-[#080808] p-5 md:w-[45%]">
-                {project.hasVideo && project.videoId ? (
-                  <div className="aspect-video w-full overflow-hidden rounded-xl">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${project.videoId}?autoplay=1&mute=1&loop=1&playlist=${project.videoId}&controls=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&disablekb=1`}
-                      className="h-full w-full"
+              <div className="flex min-h-[260px] items-center justify-center bg-[#080808] p-5 md:w-[55%]">
+                {project.hasVideo ? (
+                  <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                    <video
+                      src="/PortfolioWeb/bodega-demo.mp4"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover"
                       style={{ pointerEvents: 'none' }}
-                      title={`Video de ${project.title}`}
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
                     />
                   </div>
                 ) : project.isMobile ? (
@@ -255,7 +291,7 @@ export default function ProjectModal({
                 )}
               </div>
 
-              <div className="p-6 md:w-[55%]">
+              <div className="p-6 md:w-[45%]">
                 <p className="mb-1 font-mono text-xs text-white/25">{project.year}</p>
                 <h2 id="project-modal-title" className="mb-2 font-display text-2xl font-bold text-white">
                   {project.title}
@@ -283,7 +319,7 @@ export default function ProjectModal({
                 <div className="mb-4 space-y-3">
                   <div>
                     <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-white/25">
-                      Problema_
+                      Problema
                     </p>
                     <p className="font-body text-sm leading-relaxed text-white/50">
                       {project.problem}
@@ -291,7 +327,7 @@ export default function ProjectModal({
                   </div>
                   <div>
                     <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-white/25">
-                      Solución_
+                      Solución
                     </p>
                     <p className="font-body text-sm leading-relaxed text-white/50">
                       {project.solution}
@@ -301,7 +337,7 @@ export default function ProjectModal({
 
                 <div className="mb-5">
                   <p className="mb-2 font-mono text-[10px] uppercase tracking-widest text-white/25">
-                    Tech Stack_
+                    Tech Stack
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {project.tags.map((tag) => (

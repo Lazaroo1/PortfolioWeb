@@ -19,6 +19,15 @@
     color: #e8e8e8;
   }
 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.55);
+    z-index: 0;
+    pointer-events: none;
+  }
+
   ::selection {
     background: rgba(255,255,255,0.15);
     color: #ffffff;

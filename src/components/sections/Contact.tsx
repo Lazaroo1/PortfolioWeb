@@ -29,8 +29,7 @@ export default function Contact() {
       className="py-24 sm:py-32 px-6"
       style={{ position: 'relative', zIndex: 'auto' }}
     >
-      <div className="absolute inset-0 bg-[#0a0a0a]/65 -z-10 pointer-events-none" />
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="relative z-10 max-w-4xl mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -38,7 +37,7 @@ export default function Contact() {
           transition={{ duration: 0.7 }}
         >
           <p className="font-mono text-xs text-white tracking-widest uppercase mb-4">
-            04 / Contacto
+            Contacto
           </p>
           <h2 className="font-display text-4xl sm:text-5xl font-bold text-[#e8e8e8] mb-4">
             Hablemos.
@@ -86,7 +85,7 @@ export default function Contact() {
       </div>
 
       {/* Footer */}
-      <div className="mt-24 pt-8 text-center">
+      <div className="relative z-10 mt-24 pt-8 text-center">
         <p className="font-mono text-xs text-[#333]">
           Lázaro Daniel Díaz Bojórquez © {new Date().getFullYear()} · Guatemala
         </p>

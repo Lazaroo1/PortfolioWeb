@@ -38,8 +38,7 @@ export default function About() {
       className="py-24 sm:py-32 px-6"
       style={{ position: 'relative', zIndex: 'auto' }}
     >
-      <div className="absolute inset-0 bg-[#0a0a0a]/55 -z-10 pointer-events-none" />
-      <div className="max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -48,7 +47,7 @@ export default function About() {
         >
           {/* Label */}
           <p className="font-mono text-xs text-white tracking-widest uppercase mb-4">
-            01 / Sobre mí
+            Sobre mí
           </p>
 
           {/* Heading + Text */}

@@ -30,7 +30,6 @@ const PROJECTS_DATA: ProjectDetail[] = [
     ],
     link: null,
     hasVideo: true,
-    videoId: 'ZesBuWq-PbQ',
     screenshots: [],
     isMobile: false,
     metrics: [
@@ -125,13 +124,25 @@ const PROJECTS_DATA: ProjectDetail[] = [
 
 export default function Projects() {
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const selectedProject = PROJECTS_DATA.find((project) => project.id === selectedId) ?? null
 
   return (
     <section id="projects" className="relative z-10">
-      <div className="absolute inset-0 bg-[#0a0a0a]/60 pointer-events-none -z-10" />
-      <div className="mx-auto max-w-4xl px-6 py-24">
+      <style>
+        {`
+          @keyframes marquee {
+            from {
+              transform: translateX(0);
+            }
+            to {
+              transform: translateX(-50%);
+            }
+          }
+        `}
+      </style>
+      <div className="relative z-10 mx-auto max-w-4xl px-6 py-24">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -140,7 +151,7 @@ export default function Projects() {
           className="mb-16"
         >
           <p className="mb-4 font-mono text-xs uppercase tracking-widest text-white/40">
-            02 / Proyectos
+            Proyectos
           </p>
           <h2 className="font-display text-4xl font-bold text-white sm:text-5xl">
             Lo que he construido.
@@ -159,11 +170,15 @@ export default function Projects() {
               onMouseLeave={() => setHoveredId(null)}
               onFocus={() => setHoveredId(project.id)}
               onBlur={() => setHoveredId(null)}
-              onClick={() => setSelectedId(project.id)}
+              onClick={() => {
+                setSelectedId(project.id)
+                setSelectedIndex(index)
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
                   setSelectedId(project.id)
+                  setSelectedIndex(index)
                 }
               }}
               role="button"
@@ -206,20 +221,26 @@ export default function Projects() {
                     {project.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-1.5">
-                    {project.tags.slice(0, 5).map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-white/[0.08] px-2 py-0.5 font-mono text-[10px] text-white/30"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {project.tags.length > 5 && (
-                      <span className="self-center font-mono text-[10px] text-white/20">
-                        +{project.tags.length - 5}
-                      </span>
-                    )}
+                  <div
+                    className="max-w-[32rem] overflow-hidden"
+                    style={{
+                      maskImage:
+                        'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+                    }}
+                  >
+                    <div
+                      className="flex w-max gap-1.5"
+                      style={{ animation: 'marquee 18s linear infinite' }}
+                    >
+                      {[...project.tags, ...project.tags].map((tag, tagIndex) => (
+                        <span
+                          key={`${tag}-${tagIndex}`}
+                          className="rounded-full border border-white/[0.08] px-2 py-0.5 font-mono text-[10px] text-white/50"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -231,9 +252,9 @@ export default function Projects() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(event) => event.stopPropagation()}
-                      className="flex items-center gap-1 font-mono text-[10px] text-white/30 transition-colors hover:text-white/60"
+                      className="flex items-center gap-1.5 font-mono text-xs text-white/50 hover:text-white border border-white/10 hover:border-white/40 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full transition-all"
                     >
-                      <Github size={11} />
+                      <Github size={16} />
                       GitHub
                     </a>
                   )}
@@ -245,7 +266,20 @@ export default function Projects() {
         </div>
       </div>
 
-      <ProjectModal project={selectedProject} onClose={() => setSelectedId(null)} />
+      <ProjectModal
+        project={selectedProject}
+        onClose={() => setSelectedId(null)}
+        projectList={PROJECTS_DATA}
+        currentIndex={selectedIndex}
+        onPrev={() => {
+          setSelectedId(PROJECTS_DATA[selectedIndex - 1].id)
+          setSelectedIndex((index) => index - 1)
+        }}
+        onNext={() => {
+          setSelectedId(PROJECTS_DATA[selectedIndex + 1].id)
+          setSelectedIndex((index) => index + 1)
+        }}
+      />
     </section>
   )
 }
