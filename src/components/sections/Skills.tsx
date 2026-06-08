@@ -49,11 +49,11 @@ export default function Skills() {
                       {group.category}
                     </h3>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mt-4">
                     {group.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="font-mono text-xs text-[#666] hover:text-[#e8e8e8] transition-colors py-0.5"
+                        className="bg-neutral-900/60 border border-neutral-800/80 text-xs font-medium text-neutral-400 tracking-wide rounded-md px-2.5 py-1"
                       >
                         {skill}
                       </span>

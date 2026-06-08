@@ -1,28 +1,131 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Bot, Sparkles } from 'lucide-react'
+import portfolioContext from '../../portfolio-context.md?raw'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
 }
 
-const SYSTEM_CONTEXT = `Eres el asistente de portafolio de Lázaro Daniel Díaz Bojórquez.
-Responde preguntas sobre él de forma amigable, concisa y en el idioma del usuario.
+const GEMINI_MODEL = 'gemini-3.5-flash'
 
-Datos de Lázaro:
-- Full Stack Engineer, estudiante CS en UVG Guatemala, 5° semestre
-- Email: ldbojorquez@gmail.com | GitHub: github.com/Lazaroo1
-- Stack: React, TypeScript, Vue 3, Node.js, PostgreSQL, Docker, GitHub Actions
-- También: Go, Kotlin, Jetpack Compose, Firebase, FastAPI, Laravel
-- Proyectos:
-  * Bodega de Licores: sistema empresarial Vue 3 + Node.js + PostgreSQL, RBAC con Clerk, 316 tests Jest, CI/CD, Docker. Repo privado.
-  * OmniMarket: tienda retail React + Node.js + PostgreSQL, SQL avanzado visible en UI, transacciones ACID, reportes PDF
-  * MoodNutri: app Android Kotlin + Jetpack Compose, Gemini API para reconocer ingredientes, OpenAI para recetas
-  * Series Tracker: API REST en Go + SQLite, Swagger/OpenAPI embebido, deploy en Railway
-- Disponible para: prácticas, posiciones full stack, proyectos freelance
-- Inglés B2, Español nativo
-Solo responde sobre Lázaro. Si preguntan algo no relacionado, redirige amablemente.`
+const SYSTEM_CONTEXT = `${portfolioContext}
+
+Instrucción operativa:
+- Responde como asistente del portafolio de Lázaro.
+- Sé conciso, útil y técnico.
+- No inventes datos fuera del contexto.
+- Si la pregunta es casual, responde natural y redirige hacia el perfil, proyectos o stack de Lázaro.`
+
+interface GeminiResponse {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{ text?: string }>
+    }
+    finishReason?: string
+  }>
+  error?: {
+    message?: string
+  }
+}
+
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+function hasAny(value: string, words: string[]) {
+  return words.some((word) => value.includes(word))
+}
+
+function getLocalPortfolioAnswer(question: string) {
+  const q = normalizeText(question)
+
+  if (hasAny(q, ['hola', 'buenas', 'hey', 'que onda', 'saludos'])) {
+    return '¡Qué onda! Soy el asistente del portafolio de Lázaro. Puedo contarte sobre su perfil, proyectos, stack técnico, experiencia, el diseño del sitio o la simulación del blackhole.'
+  }
+
+  if (hasAny(q, ['contacto', 'correo', 'email', 'telefono', 'linkedin', 'github'])) {
+    return [
+      'Contacto directo de Lázaro:',
+      '- Email: ldbojorquez@gmail.com',
+      '- Teléfono: 53862772',
+      '- GitHub: https://github.com/Lazaroo1',
+      '- LinkedIn: https://www.linkedin.com/in/lazaro-diaz-146b5b39a',
+    ].join('\n')
+  }
+
+  if (hasAny(q, ['quien', 'perfil', 'lazaro', 'zaro', 'sobre el', 'sobre mi'])) {
+    return 'Lázaro Daniel Díaz Bojórquez, alias zaro, es Full Stack Engineer / Frontend Specialist y estudiante de 6° semestre de Ingeniería en Ciencias de la Computación en UVG. Su enfoque está en frontend engineering, UI/UX premium, arquitectura escalable, bases de datos, WebGL y desarrollo full stack con criterio técnico.'
+  }
+
+  if (hasAny(q, ['stack', 'tecnologias', 'habilidades', 'skills'])) {
+    return [
+      'Stack principal de Lázaro:',
+      '- Frontend: React, Vue 3, Vite, TypeScript, Tailwind CSS, Pinia, Framer Motion.',
+      '- Backend: Node.js, Express, Go, Laravel 11, FastAPI, Elysia.',
+      '- Bases de datos: PostgreSQL, MySQL, SQLite, Redis, Neo4j, Room.',
+      '- DevOps: Docker, Docker Compose, GitHub Actions, Nginx, Cloudflare, Railway.',
+      '- IA/APIs: Gemini API, OpenAI API, Swagger/OpenAPI, Retrofit.',
+    ].join('\n')
+  }
+
+  if (hasAny(q, ['frontend', 'ui', 'ux', 'interfaz', 'react', 'vue', 'tailwind'])) {
+    return 'En frontend, Lázaro trabaja principalmente con React, Vue 3, TypeScript, Vite, Tailwind CSS, Pinia y Framer Motion. Su enfoque visual es minimalista, oscuro, mate y de alta fidelidad, con atención fuerte a responsive, legibilidad y experiencia de usuario.'
+  }
+
+  if (hasAny(q, ['backend', 'api', 'node', 'express', 'go', 'laravel', 'fastapi'])) {
+    return 'En backend, Lázaro ha trabajado con Node.js, Express, Go, Laravel 11, FastAPI, Prisma ORM y Eloquent ORM. Sus proyectos muestran APIs REST, arquitectura por capas, RBAC, cookies HttpOnly, documentación OpenAPI y despliegues con Docker/Railway.'
+  }
+
+  if (hasAny(q, ['base de datos', 'database', 'sql', 'postgres', 'mysql', 'sqlite', 'metabase'])) {
+    return 'En datos, Lázaro maneja PostgreSQL, MySQL, SQLite, Redis, Neo4j y Room. Sus proyectos incluyen SQL avanzado, CTEs, transacciones ACID, stored procedures, dashboards BI con Metabase y modelos relacionales complejos.'
+  }
+
+  if (hasAny(q, ['proyecto', 'proyectos', 'portfolio', 'portafolio'])) {
+    return [
+      'Proyectos principales:',
+      '- Bodega de Licores: sistema empresarial full stack con Vue 3, Node.js, PostgreSQL, Clerk, Cloudflare R2, CI/CD y 316 tests Jest.',
+      '- OmniMarket: retail dashboard con React, PostgreSQL, SQL avanzado, transacciones ACID y reportes PDF.',
+      '- MoodNutri: app Android con Kotlin, Jetpack Compose, Gemini API y OpenAI API.',
+      '- Series Tracker: API REST en Go, SQLite, Swagger/OpenAPI y Docker/Railway.',
+      '- RetailMax: dashboard analítico con PostgreSQL, Metabase, Docker y KPIs de negocio.',
+    ].join('\n')
+  }
+
+  if (hasAny(q, ['bodega', 'licores'])) {
+    return 'Bodega de Licores es su proyecto full stack más robusto: backend por capas con Node.js, Express, Prisma y PostgreSQL; frontend en Vue 3 + Pinia; RBAC con Clerk; webhooks firmados con Svix; Cloudflare R2; automatización con node-cron; CI/CD con GitHub Actions y 316 pruebas en Jest.'
+  }
+
+  if (hasAny(q, ['omnimarket', 'retail'])) {
+    return 'OmniMarket es una app web de retail enfocada en datos: React + Vite en frontend, Node/Express en backend y PostgreSQL. Destaca por SQL avanzado visible en UI, CTEs, transacciones ACID, stored procedures, roles, cookies HttpOnly y reportes PDF.'
+  }
+
+  if (hasAny(q, ['moodnutri', 'android', 'kotlin', 'receta'])) {
+    return 'MoodNutri es una app Android en Kotlin + Jetpack Compose con arquitectura MVI. Usa Gemini API para reconocer ingredientes desde imágenes y OpenAI API para generar recetas según estado de ánimo. También usa Room/DataStore y diseño claro/oscuro.'
+  }
+
+  if (hasAny(q, ['series tracker', 'series', 'swagger'])) {
+    return 'Series Tracker es un microservicio REST en Go con SQLite, búsqueda, paginación, ratings, Swagger/OpenAPI embebido y deploy con Docker/Railway. Es un proyecto ligero para demostrar APIs claras y documentadas.'
+  }
+
+  if (hasAny(q, ['retailmax', 'metabase', 'dashboard', 'bi', 'analytics'])) {
+    return 'RetailMax es un dashboard de data analytics con PostgreSQL, Metabase y Docker. Expone KPIs de negocio como ingresos, canales, márgenes, regiones, crecimiento de clientes y recompra.'
+  }
+
+  if (hasAny(q, ['blackhole', 'agujero negro', 'shader', 'webgl', 'raymarching', 'fondo', 'lineas'])) {
+    return 'La parte visual del sitio está hecha con shaders. El fondo usa ondas senoidales por píxel para crear líneas fluidas. El blackhole usa WebGL, raymarching, framebuffers, blur y bloom para simular una lente gravitacional inspirada en Sgr A*. No son imágenes ni GIFs: todo se calcula en tiempo real en la GPU.'
+  }
+
+  if (hasAny(q, ['cv', 'practica', 'trabajo', 'oportunidad', 'freelance', 'contratar'])) {
+    return 'Lázaro está disponible para prácticas, posiciones full stack y proyectos interesantes. Su perfil encaja especialmente bien con roles de frontend engineering, full stack, bases de datos, apps con IA y productos donde importe una UI limpia y una arquitectura seria.'
+  }
+
+  return 'Puedo responder sobre Lázaro, su stack, proyectos, experiencia, contacto o cómo está construido este portafolio. Pregúntame por ejemplo: “¿cuál es su proyecto más fuerte?”, “¿qué stack maneja?” o “¿cómo hizo el blackhole?”.'
+}
 
 export default function GeminiChat() {
   const [isOpen, setIsOpen] = useState(false)
@@ -44,33 +147,66 @@ export default function GeminiChat() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return
     const userMessage = input.trim()
+    const fallbackAnswer = getLocalPortfolioAnswer(userMessage)
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
     
     try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY
+
+      if (!apiKey) {
+        setMessages(prev => [...prev, { role: 'assistant', content: fallbackAnswer }])
+        return
+      }
+
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
           body: JSON.stringify({
             contents: [{
               role: 'user',
-              parts: [{ text: SYSTEM_CONTEXT + '\n\nPregunta del usuario: ' + userMessage }],
+              parts: [{
+                text: [
+                  SYSTEM_CONTEXT,
+                  '',
+                  'Pregunta del usuario:',
+                  userMessage,
+                  '',
+                  'Responde en máximo 5 bullets o 2 párrafos cortos.',
+                ].join('\n'),
+              }],
             }],
             generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
           }),
         }
       )
-      const data = await response.json()
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-        || 'Lo siento, no pude generar una respuesta.'
+
+      const data = await response.json() as GeminiResponse
+      const text = data.candidates
+        ?.flatMap(candidate => candidate.content?.parts ?? [])
+        .map(part => part.text ?? '')
+        .join('')
+        .trim()
+
+      if (!response.ok || !text) {
+        if (data.error?.message) {
+          console.warn('Gemini API fallback:', data.error.message)
+        }
+        setMessages(prev => [...prev, { role: 'assistant', content: fallbackAnswer }])
+        return
+      }
+
       setMessages(prev => [...prev, { role: 'assistant', content: text }])
     } catch {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Error de conexión. Intenta de nuevo.',
+        content: fallbackAnswer,
       }])
     } finally {
       setLoading(false)
@@ -96,7 +232,7 @@ export default function GeminiChat() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 sm:bottom-8 right-6 z-50 w-14 h-14 rounded-full bg-white text-[#0a0a0a] shadow-2xl flex items-center justify-center"
+            className="fixed bottom-24 sm:bottom-8 right-6 z-[120] w-14 h-14 rounded-full bg-white text-[#0a0a0a] shadow-2xl flex items-center justify-center"
             style={{ pointerEvents: 'all' }}
             aria-label="Abrir chat"
           >
@@ -113,7 +249,7 @@ export default function GeminiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-24 sm:bottom-8 right-6 z-50 w-[340px] sm:w-[380px] h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-24 sm:bottom-8 right-6 z-[120] w-[340px] sm:w-[380px] h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#161616] shrink-0">

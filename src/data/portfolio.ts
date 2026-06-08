@@ -11,7 +11,7 @@ export const OWNER = {
   university: 'Universidad del Valle de Guatemala — CS, 6° semestre',
   email: 'ldbojorquez@gmail.com',
   github: 'https://github.com/Lazaroo1',
-  linkedin: 'https://linkedin.com/in/lázaro-díaz-146b5b39a',
+  linkedin: 'https://www.linkedin.com/in/lazaro-diaz-146b5b39a',
   cvUrl: '/PortfolioWeb/lazaro-cv.pdf',
   description:
     'Construyo plataformas full stack con enfoque en arquitectura limpia, ' +
