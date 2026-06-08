@@ -65,6 +65,27 @@ const PROJECTS_DATA: ProjectDetail[] = [
     ],
   },
   {
+    id: 5,
+    title: 'RetailMax',
+    year: '2026',
+    description:
+      'Dashboard de visualización de datos para estrategia y expansión comercial con PostgreSQL y Metabase.',
+    problem:
+      'RetailMax necesitaba analizar ingresos, canales, márgenes, regiones, crecimiento de clientes y recompra desde múltiples indicadores comerciales.',
+    solution:
+      'Ambiente Docker con PostgreSQL y Metabase preconfigurado, dashboard automático en 2 tabs y 14 indicadores basados en consultas SQL nativas.',
+    tags: ['PostgreSQL', 'Metabase', 'Docker', 'SQL', 'Data Visualization', 'BI'],
+    link: 'https://github.com/Lazaroo1/DB-lab7-retailmax',
+    hasVideo: false,
+    screenshots: [`${BASE}retail-1.png`, `${BASE}retail-2.png`, `${BASE}retail-3.png`],
+    isMobile: false,
+    metrics: [
+      { label: 'Indicadores', value: '14' },
+      { label: 'Tabs', value: '2' },
+      { label: 'Setup', value: 'Docker' },
+    ],
+  },
+  {
     id: 3,
     title: 'MoodNutri',
     year: '2025',
