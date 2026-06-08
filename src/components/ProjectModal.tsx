@@ -241,12 +241,12 @@ export default function ProjectModal({
             style={{ maxHeight: '90vh' }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="absolute right-14 top-4 z-20 flex gap-1">
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-1">
               <button
                 type="button"
                 onClick={onPrev}
                 disabled={!canGoPrev}
-                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/15 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
                 aria-label="Proyecto anterior"
               >
                 <ChevronLeft size={16} />
@@ -255,20 +255,20 @@ export default function ProjectModal({
                 type="button"
                 onClick={onNext}
                 disabled={!canGoNext}
-                className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/15 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/50"
                 aria-label="Proyecto siguiente"
               >
                 <ChevronRight size={16} />
               </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/40 transition-all hover:bg-white/10 hover:text-white"
+                aria-label="Cerrar modal"
+              >
+                <X size={15} />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/40 transition-all hover:bg-white/10 hover:text-white"
-              aria-label="Cerrar modal"
-            >
-              <X size={15} />
-            </button>
 
             <div className="flex flex-col overflow-auto md:flex-row" style={{ maxHeight: '90vh' }}>
               <div className="flex min-h-[260px] items-center justify-center bg-[#080808] p-5 md:w-[55%]">
