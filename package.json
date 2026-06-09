@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "worker:dev": "npx wrangler dev",
+    "worker:deploy": "npx wrangler deploy",
+    "worker:secret": "npx wrangler secret put GEMINI_API_KEY"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.0.2",

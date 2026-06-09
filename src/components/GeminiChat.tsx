@@ -7,6 +7,12 @@ interface Message {
   content: string
 }
 
+interface ChatProxyResponse {
+  reply?: string
+  error?: string
+  details?: string
+}
+
 function normalizeText(value: string) {
   return value
     .toLowerCase()
@@ -131,17 +137,48 @@ export default function GeminiChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim() || loading) return
     const userMessage = input.trim()
-    const answer = getLocalPortfolioAnswer(userMessage)
+    const localAnswer = getLocalPortfolioAnswer(userMessage)
+    const history = messages
+      .filter(message => message.content.trim())
+      .slice(-8)
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
-    window.setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'assistant', content: answer }])
+
+    try {
+      const proxyUrl = import.meta.env.VITE_CHAT_PROXY_URL
+
+      if (!proxyUrl) {
+        await new Promise(resolve => window.setTimeout(resolve, 120))
+        setMessages(prev => [...prev, { role: 'assistant', content: localAnswer }])
+        return
+      }
+
+      const response = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage, history }),
+      })
+      const data = await response.json() as ChatProxyResponse
+      const reply = data.reply?.trim()
+
+      if (!response.ok || !reply) {
+        if (data.error || data.details) {
+          console.warn('Chat proxy fallback:', data.error, data.details)
+        }
+        setMessages(prev => [...prev, { role: 'assistant', content: localAnswer }])
+        return
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: localAnswer }])
+    } finally {
       setLoading(false)
-    }, 120)
+    }
   }
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -193,7 +230,7 @@ export default function GeminiChat() {
                     Asistente de Lázaro
                   </p>
                   <p className="font-mono text-[10px] text-white/30 leading-tight">
-                    Respuestas rápidas del portafolio
+                    Powered by Gemini
                   </p>
                 </div>
               </div>

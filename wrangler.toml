@@ -1,0 +1,12 @@
+name = "portfolio-bot-proxy"
+main = "worker/index.ts"
+compatibility_date = "2026-06-09"
+workers_dev = true
+
+rules = [
+  { type = "Text", globs = ["**/*.md"], fallthrough = true }
+]
+
+[vars]
+ALLOWED_ORIGIN = "https://lazaroo1.github.io"
+GEMINI_MODEL = "gemini-2.5-flash"

@@ -27,6 +27,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_CHAT_PROXY_URL: ${{ vars.VITE_CHAT_PROXY_URL }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
