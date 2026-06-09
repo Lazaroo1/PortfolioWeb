@@ -11,12 +11,16 @@
 
   html {
     scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-[#0a0a0a] text-[#e8e8e8] font-body antialiased;
     background-color: #0a0a0a;
     color: #e8e8e8;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   body::before {
@@ -43,21 +47,6 @@
 main {
   position: relative;
   z-index: 1;
-}
-
-html.blackhole-immersive,
-body.blackhole-immersive {
-  overflow: hidden;
-}
-
-body.blackhole-immersive main {
-  z-index: 220 !important;
-}
-
-body.blackhole-immersive .site-navbar-shell,
-body.blackhole-immersive .chatbot-shell {
-  opacity: 0;
-  pointer-events: none !important;
 }
 
 canvas {

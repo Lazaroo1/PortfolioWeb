@@ -38,9 +38,6 @@ export function NavBar({ activeSection, className }: NavBarProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, name: string) => {
     e.preventDefault()
     setActiveTab(name)
-    window.dispatchEvent(
-      new CustomEvent('blackhole:suppress-scroll-immersion', { detail: { duration: 1800 } })
-    )
     const targetId = href.replace('#', '')
     const el = document.getElementById(targetId)
     if (el) {

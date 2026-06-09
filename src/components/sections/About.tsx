@@ -106,7 +106,7 @@ export default function About() {
             ))}
           </div>
 
-          <div className="relative left-1/2 right-1/2 mb-0 ml-[-50vw] mr-[-50vw] w-screen px-6">
+          <div className="relative left-1/2 right-1/2 mb-0 ml-[-50vw] mr-[-50vw] w-screen">
             <div className="mb-6 flex items-center gap-4">
               <div className="flex-1 h-px bg-white/[0.06]" />
               <p className="font-mono text-[10px] text-white/25 uppercase tracking-widest">
@@ -116,12 +116,12 @@ export default function About() {
             </div>
 
             <div
-              className="relative mx-auto w-full max-w-7xl rounded-2xl overflow-visible border border-white/[0.06]"
+              className="relative w-full overflow-hidden"
               style={{ background: 'radial-gradient(ellipse at center, #0a0805 0%, #050505 60%, #000000 100%)' }}
             >
               <Suspense
                 fallback={
-                  <div className="h-[640px] flex items-center justify-center">
+                  <div className="flex h-[100dvh] min-h-[640px] items-center justify-center">
                     <span className="font-mono text-xs text-white/20 animate-pulse">
                       initializing black hole…
                     </span>
