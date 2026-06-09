@@ -64,8 +64,6 @@ Otra mejora sería pulir más el contenido de los modales del agujero negro. Aho
 
 También agregaría tests para componentes importantes. No creo que todo portafolio necesite una suite gigante de pruebas, pero sí tendría sentido probar interacciones clave como abrir proyectos, navegar modales, copiar email y descargar el CV.
 
-Otra mejora importante sería evolucionar el chatbot flotante. En esta versión responde con lógica local basada en el contenido del portafolio para que sea rápido, estable y no dependa de red. Más adelante lo ideal sería conectarlo a Gemini mediante un proxy o backend seguro: el frontend mandaría la pregunta, el backend leería un archivo de contexto como `portfolio-context.md`, llamaría a Gemini con una API key protegida y devolvería una respuesta más flexible. Lo haría así para no exponer la API key en el navegador y para controlar mejor la calidad de las respuestas.
-
 Finalmente, mejoraría el sistema de datos para que todo el contenido esté centralizado. Algunas cosas ya viven en `src/data/portfolio.ts`, pero los proyectos detallados y los planetas podrían moverse a archivos de datos separados para que el mantenimiento sea más limpio.
 
 ## Tecnologías Usadas
@@ -80,9 +78,3 @@ Finalmente, mejoraría el sistema de datos para que todo el contenido esté cent
 - HTML Canvas
 - GitHub Pages
 - gh-pages
-
-## Créditos
-
-La simulación del agujero negro está basada e inspirada en el shader de Shadertoy: https://www.shadertoy.com/view/lstSRS
-
-El portafolio adapta esa idea a un componente de React con WebGL, canvas, framebuffers y lógica propia de interacción para integrarlo con el resto de la página.
