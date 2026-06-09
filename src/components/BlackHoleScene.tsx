@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Maximize2, Minimize2 } from 'lucide-react'
 
 const VERTEX_SHADER = `#version 300 es
 layout(location = 0) in vec2 aPosition;
@@ -987,16 +988,12 @@ export default function BlackHoleScene() {
       >
         {isFullscreen ? (
           <>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9L4 4m0 0l4-1m-4 1l1 4m10-5l5 5m0 0l-1-4m1 4l-4-1M4 20l5-5m0 0l-4-1m4 1l-1-4m11 10l-5-5m0 0l1 4m-1-4l4 1" />
-            </svg>
+            <Minimize2 size={15} strokeWidth={2} />
             Salir
           </>
         ) : (
           <>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
+            <Maximize2 size={15} strokeWidth={2} />
             Explorar Universo
           </>
         )}
