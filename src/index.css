@@ -45,6 +45,21 @@ main {
   z-index: 1;
 }
 
+html.blackhole-immersive,
+body.blackhole-immersive {
+  overflow: hidden;
+}
+
+body.blackhole-immersive main {
+  z-index: 220 !important;
+}
+
+body.blackhole-immersive .site-navbar-shell,
+body.blackhole-immersive .chatbot-shell {
+  opacity: 0;
+  pointer-events: none !important;
+}
+
 canvas {
   z-index: -1;
 }

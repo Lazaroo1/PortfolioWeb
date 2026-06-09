@@ -200,7 +200,7 @@ export default function GeminiChat() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-24 sm:bottom-8 right-6 z-[120] w-14 h-14 rounded-full bg-white text-[#0a0a0a] shadow-2xl flex items-center justify-center"
+            className="chatbot-shell fixed bottom-24 sm:bottom-8 right-6 z-[120] w-14 h-14 rounded-full bg-white text-[#0a0a0a] shadow-2xl flex items-center justify-center"
             style={{ pointerEvents: 'all' }}
             aria-label="Abrir chat"
           >
@@ -217,7 +217,7 @@ export default function GeminiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-24 sm:bottom-8 right-6 z-[120] w-[340px] sm:w-[380px] h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="chatbot-shell fixed bottom-24 sm:bottom-8 right-6 z-[120] w-[340px] sm:w-[380px] h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#161616] shrink-0">

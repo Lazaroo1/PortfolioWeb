@@ -692,7 +692,11 @@ function bindTextureToUnit(
 export default function BlackHoleScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const scrollFrameRef = useRef<HTMLDivElement>(null)
+  const scrollDismissedRef = useRef(false)
+  const scrollSuppressedUntilRef = useRef(0)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isScrollImmersive, setIsScrollImmersive] = useState(false)
   
   // Estado que almacena el id del planeta seleccionado (null si no hay ninguno abierto)
   const [activePlanetId, setActivePlanetId] = useState<number | null>(null)
@@ -902,36 +906,135 @@ export default function BlackHoleScene() {
     }
   }, [])
 
-  const toggleFullscreen = async () => {
+  useEffect(() => {
+    let frame = 0
+
+    const updateScrollImmersion = () => {
+      frame = 0
+      const el = scrollFrameRef.current
+      if (!el || document.fullscreenElement) return
+
+      if (performance.now() < scrollSuppressedUntilRef.current) {
+        setIsScrollImmersive(false)
+        return
+      }
+
+      const rect = el.getBoundingClientRect()
+      const viewportHeight = window.innerHeight || 1
+      const activationLine = viewportHeight * 0.22
+      const shouldImmerse = rect.top <= activationLine && rect.bottom >= activationLine
+
+      if (!shouldImmerse) {
+        scrollDismissedRef.current = false
+        setIsScrollImmersive(false)
+        return
+      }
+
+      if (!scrollDismissedRef.current) {
+        setIsScrollImmersive(true)
+      }
+    }
+
+    const scheduleUpdate = () => {
+      if (frame !== 0) return
+      frame = window.requestAnimationFrame(updateScrollImmersion)
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+
+    return () => {
+      if (frame !== 0) window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+    }
+  }, [])
+
+  useEffect(() => {
+    const suppressScrollImmersion = (event: Event) => {
+      const duration =
+        event instanceof CustomEvent && typeof event.detail?.duration === 'number'
+          ? event.detail.duration
+          : 1600
+
+      scrollSuppressedUntilRef.current = performance.now() + duration
+      scrollDismissedRef.current = true
+      setIsScrollImmersive(false)
+    }
+
+    window.addEventListener('blackhole:suppress-scroll-immersion', suppressScrollImmersion)
+
+    return () => {
+      window.removeEventListener('blackhole:suppress-scroll-immersion', suppressScrollImmersion)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('blackhole-immersive', isScrollImmersive)
+    document.body.classList.toggle('blackhole-immersive', isScrollImmersive)
+
+    return () => {
+      document.documentElement.classList.remove('blackhole-immersive')
+      document.body.classList.remove('blackhole-immersive')
+    }
+  }, [isScrollImmersive])
+
+  const enterBrowserFullscreen = async () => {
     if (!containerRef.current) return
+
     try {
       if (!document.fullscreenElement) {
         await containerRef.current.requestFullscreen()
-      } else {
+      }
+    } catch (err) {
+      console.error('Error al intentar activar la pantalla completa:', err)
+    }
+  }
+
+  const minimizeBlackHole = async () => {
+    scrollDismissedRef.current = true
+    setIsScrollImmersive(false)
+
+    try {
+      if (document.fullscreenElement) {
         await document.exitFullscreen()
       }
     } catch (err) {
-      console.error('Error al intentar cambiar el modo de pantalla completa:', err)
+      console.error('Error al intentar salir de la pantalla completa:', err)
     }
   }
 
   const selectedPlanet = PLANETS_DATA.find((p) => p.id === activePlanetId)
+  const isImmersive = isFullscreen || isScrollImmersive
+  const controlButtonClass =
+    'flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 px-4 py-2.5 font-sans text-xs font-medium uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-all hover:bg-neutral-900/80 hover:text-white active:scale-95 select-none focus:outline-none'
 
   return (
     <div 
-      ref={containerRef} 
-      className={`relative w-full bg-[#0D0D0D] overflow-hidden transition-all duration-300 ${
-        isFullscreen ? 'h-screen w-screen' : 'h-[640px] rounded-2xl border border-neutral-900'
+      ref={scrollFrameRef}
+      className={`relative transition-[height] duration-300 ${
+        isScrollImmersive ? 'h-[160vh]' : 'h-[640px]'
       }`}
     >
-      <canvas
-        ref={canvasRef}
-        className="block h-full w-full cursor-grab active:cursor-grabbing"
-        aria-label="Procedural WebGL2 black hole animation"
-      />
+      <div
+        ref={containerRef} 
+        className={`${
+          isScrollImmersive && !isFullscreen
+            ? 'fixed left-0 top-0 z-[220] h-[100dvh] w-[100dvw] max-w-none rounded-none border-0'
+            : 'relative h-full w-full'
+        } bg-[#0D0D0D] overflow-hidden transition-all duration-300 ${
+          isImmersive ? 'rounded-none border-0' : 'rounded-2xl border border-neutral-900'
+        }`}
+      >
+        <canvas
+          ref={canvasRef}
+          className="block h-full w-full cursor-grab active:cursor-grabbing"
+          aria-label="Procedural WebGL2 black hole animation"
+        />
 
       {/* --- PLANETAS INTERACTIVOS (HTML Overlay) --- */}
-      {PLANETS_DATA.map((planet) => (
+        {PLANETS_DATA.map((planet) => (
         <button
           key={planet.id}
           onClick={() => setActivePlanetId(planet.id)}
@@ -947,10 +1050,10 @@ export default function BlackHoleScene() {
             {planet.name}
           </span>
         </button>
-      ))}
+        ))}
 
       {/* --- POP-UP MODAL (Matte Glassmorphism Estilo Startup) --- */}
-      {activePlanetId !== null && selectedPlanet && (
+        {activePlanetId !== null && selectedPlanet && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs transition-opacity duration-200">
           {/* Clic fuera del contenedor para cerrar */}
           <div className="absolute inset-0" onClick={() => setActivePlanetId(null)} />
@@ -979,36 +1082,52 @@ export default function BlackHoleScene() {
             </div>
           </div>
         </div>
-      )}
+        )}
 
       {/* Botón de control Fullscreen */}
-      <button
-        onClick={toggleFullscreen}
-        className="absolute bottom-6 right-6 z-40 flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950/60 px-4 py-2.5 font-sans text-xs font-medium uppercase tracking-widest text-neutral-300 backdrop-blur-md transition-all hover:bg-neutral-900/80 hover:text-white active:scale-95 select-none focus:outline-none"
-      >
-        {isFullscreen ? (
-          <>
-            <Minimize2 size={15} strokeWidth={2} />
-            Salir
-          </>
-        ) : (
-          <>
-            <Maximize2 size={15} strokeWidth={2} />
-            Explorar Universo
-          </>
-        )}
-      </button>
+        <div className="absolute bottom-6 right-6 z-40 flex items-center gap-2">
+          {isScrollImmersive && !isFullscreen ? (
+            <>
+              <button onClick={enterBrowserFullscreen} className={controlButtonClass}>
+                <Maximize2 size={15} strokeWidth={2} />
+                Maximizar
+              </button>
+              <button onClick={minimizeBlackHole} className={controlButtonClass}>
+                <Minimize2 size={15} strokeWidth={2} />
+                Salir
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={isFullscreen ? minimizeBlackHole : enterBrowserFullscreen}
+              className={controlButtonClass}
+            >
+              {isFullscreen ? (
+                <>
+                  <Minimize2 size={15} strokeWidth={2} />
+                  Salir
+                </>
+              ) : (
+                <>
+                  <Maximize2 size={15} strokeWidth={2} />
+                  Explorar Universo
+                </>
+              )}
+            </button>
+          )}
+        </div>
 
       {/* Overlay de instrucciones dinámico */}
-      <div 
-        className={`absolute left-1/2 top-8 z-30 -translate-x-1/2 pointer-events-none select-none transition-all duration-500 transform ${
-          isFullscreen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
-        }`}
-      >
-        <div className="rounded-xl border border-neutral-800/40 bg-neutral-950/40 px-6 py-3 backdrop-blur-md">
-          <p className="font-sans text-xs font-light tracking-wide text-neutral-400 text-center">
-            ✦ Selecciona un planeta en órbita para desplegar registros...
-          </p>
+        <div 
+          className={`absolute left-1/2 top-8 z-30 -translate-x-1/2 pointer-events-none select-none transition-all duration-500 transform ${
+            isImmersive ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
+          }`}
+        >
+          <div className="rounded-xl border border-neutral-800/40 bg-neutral-950/40 px-6 py-3 backdrop-blur-md">
+            <p className="font-sans text-xs font-light tracking-wide text-neutral-400 text-center">
+              ✦ Selecciona un planeta en órbita para desplegar registros...
+            </p>
+          </div>
         </div>
       </div>
     </div>

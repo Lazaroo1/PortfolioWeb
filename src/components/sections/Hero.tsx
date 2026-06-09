@@ -101,6 +101,9 @@ export default function Hero() {
         >
           <button
             onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent('blackhole:suppress-scroll-immersion', { detail: { duration: 1800 } })
+              )
               const el = document.getElementById('projects')
               if (el) el.scrollIntoView({ behavior: 'smooth' })
             }}

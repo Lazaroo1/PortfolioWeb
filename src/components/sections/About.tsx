@@ -106,7 +106,7 @@ export default function About() {
             ))}
           </div>
 
-          <div className="relative left-1/2 mb-0 w-[calc(100vw-3rem)] max-w-7xl -translate-x-1/2">
+          <div className="relative left-1/2 right-1/2 mb-0 ml-[-50vw] mr-[-50vw] w-screen px-6">
             <div className="mb-6 flex items-center gap-4">
               <div className="flex-1 h-px bg-white/[0.06]" />
               <p className="font-mono text-[10px] text-white/25 uppercase tracking-widest">
@@ -116,7 +116,7 @@ export default function About() {
             </div>
 
             <div
-              className="relative w-full rounded-2xl overflow-hidden border border-white/[0.06]"
+              className="relative mx-auto w-full max-w-7xl rounded-2xl overflow-visible border border-white/[0.06]"
               style={{ background: 'radial-gradient(ellipse at center, #0a0805 0%, #050505 60%, #000000 100%)' }}
             >
               <Suspense

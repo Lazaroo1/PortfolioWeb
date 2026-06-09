@@ -38,6 +38,9 @@ export function NavBar({ activeSection, className }: NavBarProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, name: string) => {
     e.preventDefault()
     setActiveTab(name)
+    window.dispatchEvent(
+      new CustomEvent('blackhole:suppress-scroll-immersion', { detail: { duration: 1800 } })
+    )
     const targetId = href.replace('#', '')
     const el = document.getElementById(targetId)
     if (el) {
@@ -50,7 +53,7 @@ export function NavBar({ activeSection, className }: NavBarProps) {
   return (
     <div
       className={cn(
-        'fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6',
+        'site-navbar-shell fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6',
         className,
       )}
       style={{ pointerEvents: 'none' }}
