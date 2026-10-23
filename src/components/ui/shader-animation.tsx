@@ -19,7 +19,7 @@ const fragmentShaderSource = `
   uniform vec2 u_resolution;
   uniform float u_time;
   uniform vec2 u_mouse;
-  // 0 sin puntero; hasta 1 mientras el mouse, el dedo o el giroscopio están activos
+  // 0 sin puntero; hasta 1 mientras el mouse (compu) o el giroscopio (teléfono) están activos
   uniform float u_pull;
 
   float noise(vec2 p) {
@@ -168,6 +168,10 @@ export default function ShaderAnimation() {
     const minFrameInterval = touchScreen ? TOUCH_MIN_FRAME_INTERVAL_MS : MIN_FRAME_INTERVAL_MS
     let lastDrawAt = 0
     let contextLost = false
+    // Reloj de la animación: no avanza mientras el fondo está tapado, así al volver sigue donde se quedó
+    let pausedSince: number | null = null
+    let pausedFor = 0
+    const clock = (now: number) => now - pausedFor - (pausedSince === null ? 0 : now - pausedSince)
 
     // Puntero que dobla las ondas: a dónde va (target) y dónde está ya suavizado (pointer).
     // Con "reducir movimiento" activado en el sistema, las ondas no reaccionan
@@ -175,8 +179,6 @@ export default function ShaderAnimation() {
     const target = { x: 0.5, y: 0.5, pull: 0 }
     const pointer = { x: 0.5, y: 0.5, pull: 0 }
     let lastEaseAt = 0
-    let touchUntil = 0
-    let gyroActive = false
     let tiltRest: number | null = null
 
     const aimAt = (x: number, y: number, pull: number) => {
@@ -223,7 +225,7 @@ export default function ShaderAnimation() {
       canvas.height = height
       gl.viewport(0, 0, width, height)
       // Cambiar el tamaño del canvas lo borra: dibujar de una vez evita un frame en negro
-      if (!contextLost) draw(performance.now())
+      if (!contextLost) draw(clock(performance.now()))
     }
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -235,24 +237,10 @@ export default function ShaderAnimation() {
       if (!event.relatedTarget) target.pull = 0
     }
 
-    // En el teléfono el dedo también las mueve (también mientras haces scroll) y manda sobre el giroscopio
-    const handleTouch = (event: TouchEvent) => {
-      const touch = event.touches[0]
-      if (!touch) return
-      touchUntil = performance.now() + 1200
-      aimAt(touch.clientX / window.innerWidth, 1 - touch.clientY / window.innerHeight, 1)
-    }
-
-    const handleTouchEnd = () => {
-      if (!gyroActive) target.pull = 0
-    }
-
     // Giroscopio (solo llega en HTTPS; en iPhone, después de dar permiso). La postura en que
     // sostienes el teléfono cuenta como el centro, y se vuelve a centrar despacio si cambias de postura
     const handleOrientation = (event: DeviceOrientationEvent) => {
       if (event.beta === null || event.gamma === null) return
-      gyroActive = true
-      if (performance.now() < touchUntil) return
 
       const angle = screen.orientation?.angle ?? 0
       let tiltX = event.gamma
@@ -271,12 +259,20 @@ export default function ShaderAnimation() {
 
     const render = (time: number) => {
       animationRef.current = window.requestAnimationFrame(render)
+      // Con el blackhole en pantalla completa o un proyecto abierto el fondo casi no se ve
+      // (queda detrás del oscurecido y el difuminado): no gastar GPU en él
+      if (root.classList.contains('blackhole-expanded') || root.classList.contains('project-modal-open')) {
+        if (pausedSince === null) pausedSince = time
+        return
+      }
+      if (pausedSince !== null) {
+        pausedFor += time - pausedSince
+        pausedSince = null
+      }
       if (time - lastDrawAt < minFrameInterval) return
-      // Con el blackhole en pantalla completa el fondo no se ve: no gastar GPU en él
-      if (root.classList.contains('blackhole-expanded')) return
 
       lastDrawAt = time
-      draw(time)
+      draw(clock(time))
     }
 
     const handleContextLost = (event: Event) => {
@@ -293,12 +289,14 @@ export default function ShaderAnimation() {
     const resizeObserver = new ResizeObserver(resize)
     resizeObserver.observe(canvas)
     resize()
-    window.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseout', handleMouseOut)
-    window.addEventListener('touchstart', handleTouch, { passive: true })
-    window.addEventListener('touchmove', handleTouch, { passive: true })
-    window.addEventListener('touchend', handleTouchEnd, { passive: true })
-    window.addEventListener('deviceorientation', handleOrientation)
+    // En la compu las ondas siguen al mouse y en el teléfono solo al giroscopio. Los toques también
+    // disparan eventos de mouse, por eso el mouse solo cuenta cuando el puntero principal no es táctil
+    if (touchScreen) {
+      window.addEventListener('deviceorientation', handleOrientation)
+    } else {
+      window.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseout', handleMouseOut)
+    }
     canvas.addEventListener('webglcontextlost', handleContextLost)
     canvas.addEventListener('webglcontextrestored', handleContextRestored)
     animationRef.current = window.requestAnimationFrame(render)
@@ -311,9 +309,6 @@ export default function ShaderAnimation() {
       resizeObserver.disconnect()
       window.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseout', handleMouseOut)
-      window.removeEventListener('touchstart', handleTouch)
-      window.removeEventListener('touchmove', handleTouch)
-      window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('deviceorientation', handleOrientation)
       canvas.removeEventListener('webglcontextlost', handleContextLost)
       canvas.removeEventListener('webglcontextrestored', handleContextRestored)

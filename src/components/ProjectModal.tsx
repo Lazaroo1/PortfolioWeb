@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Github, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -19,6 +19,8 @@ export interface ProjectDetail {
   captions?: string[]
   isMobile?: boolean
   metrics?: { label: string; value: string }[]
+  // Lo que se lee en la barra de direcciones de la ventana (por defecto localhost)
+  windowLabel?: string
 }
 
 function EmptyScreenshots() {
@@ -109,7 +111,33 @@ function MobileCarousel({ screenshots }: { screenshots: string[] }) {
 
 const isClip = (src: string) => src.endsWith('.mp4')
 
-function DesktopCarousel({ screenshots, captions }: { screenshots: string[]; captions?: string[] }) {
+// Ventana de Mac en modo oscuro. El modal es de un solo color, así que la barra va más clara,
+// con borde y sombra, para que la ventana se distinga del fondo
+function MacWindow({ label = 'localhost', children }: { label?: string; children: ReactNode }) {
+  return (
+    <div className="w-full overflow-hidden rounded-xl border border-white/[0.14] bg-[#111] shadow-[0_24px_60px_-16px_rgba(0,0,0,0.95)]">
+      <div className="flex items-center gap-1.5 border-b border-black/70 bg-[#262628] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]">
+        <div className="h-3 w-3 shrink-0 rounded-full bg-[#ff5f57]" />
+        <div className="h-3 w-3 shrink-0 rounded-full bg-[#febc2e]" />
+        <div className="h-3 w-3 shrink-0 rounded-full bg-[#28c840]" />
+        <div className="mx-3 flex h-5 min-w-0 flex-1 items-center justify-center rounded-md bg-[#18181a] px-2">
+          <span className="truncate font-mono text-[9px] text-white/40">{label}</span>
+        </div>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function DesktopCarousel({
+  screenshots,
+  captions,
+  windowLabel,
+}: {
+  screenshots: string[]
+  captions?: string[]
+  windowLabel?: string
+}) {
   const [current, setCurrent] = useState(0)
   const count = screenshots.length
   const caption = captions?.[current]
@@ -129,17 +157,8 @@ function DesktopCarousel({ screenshots, captions }: { screenshots: string[]; cap
   }
 
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-1.5 rounded-t-xl border-b border-white/5 bg-[#1a1a1a] px-4 py-2.5">
-        <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-        <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-        <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-        <div className="mx-3 flex h-5 flex-1 items-center justify-center rounded bg-[#111]">
-          <span className="font-mono text-[9px] text-white/15">localhost</span>
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-b-xl border border-t-0 border-white/10 bg-[#111]">
+    <MacWindow label={windowLabel}>
+      <div className="relative overflow-hidden bg-[#111]">
         <AnimatePresence mode="wait">
           {isClip(src) ? (
             <motion.video
@@ -211,7 +230,7 @@ function DesktopCarousel({ screenshots, captions }: { screenshots: string[]; cap
           </>
         )}
       </div>
-    </div>
+    </MacWindow>
   )
 }
 
@@ -315,10 +334,13 @@ export default function ProjectModal({
 
     document.addEventListener('keydown', handleKey)
     document.body.style.overflow = 'hidden'
+    // El fondo animado y el blackhole quedan detrás del oscurecido: se pausan mientras haya un proyecto abierto
+    document.documentElement.classList.add('project-modal-open')
 
     return () => {
       document.removeEventListener('keydown', handleKey)
       document.body.style.overflow = ''
+      document.documentElement.classList.remove('project-modal-open')
     }
   }, [project, onClose, canGoPrev, canGoNext, onPrev, onNext])
 
@@ -374,10 +396,12 @@ export default function ProjectModal({
               }}
               className="flex min-h-0 flex-1 flex-col overflow-auto md:flex-row"
             >
-              <div className="flex min-h-[260px] shrink-0 items-center justify-center bg-[#080808] p-5 md:w-[55%]">
+              {/* Mismo fondo que el resto del modal: un bloque más oscuro detrás de cada imagen chocaba.
+                  En columna (teléfono) el espacio de arriba deja la ventana debajo del botón de cerrar */}
+              <div className="flex min-h-[260px] shrink-0 items-center justify-center px-5 pb-5 pt-14 md:w-[55%] md:p-5">
                 {project.hasVideo ? (
                   // Misma proporción que la grabación (1280×602) para que no se recorten los lados
-                  <div className="aspect-[1280/602] w-full overflow-hidden rounded-xl bg-black">
+                  <MacWindow label={project.windowLabel}>
                     <video
                       src="/PortfolioWeb/bodega-demo.mp4"
                       poster="/PortfolioWeb/bodega-demo.jpg"
@@ -385,14 +409,18 @@ export default function ProjectModal({
                       muted
                       loop
                       playsInline
-                      className="w-full h-full object-cover"
+                      className="block aspect-[1280/602] w-full object-cover"
                       style={{ pointerEvents: 'none' }}
                     />
-                  </div>
+                  </MacWindow>
                 ) : project.isMobile ? (
                   <MobileCarousel screenshots={project.screenshots} />
                 ) : (
-                  <DesktopCarousel screenshots={project.screenshots} captions={project.captions} />
+                  <DesktopCarousel
+                    screenshots={project.screenshots}
+                    captions={project.captions}
+                    windowLabel={project.windowLabel}
+                  />
                 )}
               </div>
 

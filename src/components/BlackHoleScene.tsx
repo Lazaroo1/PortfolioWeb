@@ -1224,9 +1224,11 @@ export default function BlackHoleScene() {
       drawFrame(now)
     }
 
-    // Solo dibuja cuando se ve: fuera de pantalla o con la pestaña oculta queda en pausa
+    // Solo dibuja cuando se ve: fuera de pantalla, con la pestaña oculta o detrás de un proyecto
+    // abierto (queda oscurecido y difuminado) queda en pausa
     const updateRunning = () => {
-      const shouldRun = onScreen && !document.hidden
+      const shouldRun =
+        onScreen && !document.hidden && !document.documentElement.classList.contains('project-modal-open')
       if (shouldRun === running) return
       running = shouldRun
       const now = performance.now()
@@ -1326,6 +1328,10 @@ export default function BlackHoleScene() {
     })
     visibilityObserver.observe(container)
 
+    // El modal de proyectos avisa con una clase en <html>
+    const modalObserver = new MutationObserver(updateRunning)
+    modalObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
     schedule()
 
     return () => {
@@ -1333,6 +1339,7 @@ export default function BlackHoleScene() {
       window.cancelAnimationFrame(frame)
       resizeObserver.disconnect()
       visibilityObserver.disconnect()
+      modalObserver.disconnect()
       canvas.removeEventListener('pointermove', handlePointerMove)
       canvas.removeEventListener('pointerdown', handlePointerDown)
       canvas.removeEventListener('webglcontextlost', handleContextLost)

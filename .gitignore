@@ -4,3 +4,6 @@ dist/
 *.local
 .env
 .dev.vars
+
+# Archivos temporales de wrangler (deploy del worker)
+.wrangler/

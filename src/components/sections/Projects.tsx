@@ -32,6 +32,8 @@ const PROJECTS_DATA: ProjectDetail[] = [
     hasVideo: true,
     screenshots: [],
     isMobile: false,
+    // El sistema está en línea: la ventana muestra su dominio real
+    windowLabel: 'bodegadelicores.app',
     metrics: [
       { label: 'En producción', value: 'Live' },
       { label: 'Mis commits', value: '338' },
