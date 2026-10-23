@@ -10,3 +10,21 @@ rules = [
 [vars]
 ALLOWED_ORIGIN = "https://lazaroo1.github.io"
 GEMINI_MODEL = "gemini-2.5-flash"
+
+# Límites de mensajes para cuidar la cuota de Gemini: por persona (IP) y uno general.
+# Son aproximados y se cuentan por ubicación de Cloudflare; period solo acepta 10 o 60 segundos
+[[ratelimits]]
+name = "CHAT_PER_IP"
+namespace_id = "1801"
+
+  [ratelimits.simple]
+  limit = 8
+  period = 60
+
+[[ratelimits]]
+name = "CHAT_GLOBAL"
+namespace_id = "1802"
+
+  [ratelimits.simple]
+  limit = 60
+  period = 60

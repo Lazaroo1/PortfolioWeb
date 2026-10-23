@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowDown, Download } from 'lucide-react'
 import VaporizeTextCycle, { Tag } from '@/components/ui/vaporize-text'
+import MotionPermissionButton from '@/components/ui/motion-permission'
 import { OWNER, HERO_TEXTS } from '@/data/portfolio'
 
 const ShaderAnimation = lazy(() => import('@/components/ui/shader-animation'))
@@ -22,9 +23,10 @@ export default function Hero() {
         <ShaderAnimation />
       </Suspense>
 
+      {/* El padding evita que el navbar tape el contenido cuando la pantalla es baja (teléfono horizontal) */}
       <section
         id="hero"
-        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-28 pb-24"
       >
       {/* Content */}
       <div className="relative z-10 w-full text-center px-6 max-w-[22rem] sm:max-w-4xl mx-auto">
@@ -58,12 +60,13 @@ export default function Hero() {
           transition={{ delay: 0.6 }}
           className="h-14 sm:h-16 flex items-center justify-center mb-6"
         >
-          <div className="w-full max-w-lg h-full">
+          {/* En teléfono baja a 26px (o menos en pantallas angostas) para que "Node.js & PostgreSQL" quepa */}
+          <div className="w-full max-w-lg h-full [--hero-title-size:min(26px,7.5vw)] sm:[--hero-title-size:28px]">
             <VaporizeTextCycle
               texts={HERO_TEXTS}
               font={{
                 fontFamily: 'Syne, sans-serif',
-                fontSize: '28px',
+                fontSize: 'var(--hero-title-size)',
                 fontWeight: 600,
               }}
               color="rgb(255, 255, 255)"
@@ -121,6 +124,9 @@ export default function Hero() {
             Descargar CV
           </a>
         </motion.div>
+
+        {/* Solo en iPhone: pide permiso para que el fondo siga la inclinación del teléfono */}
+        <MotionPermissionButton />
       </div>
 
       {/* Scroll indicator */}

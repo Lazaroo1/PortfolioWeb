@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ElementType } from 'react'
 import { cn } from '@/lib/utils'
 
 export enum Tag {
@@ -94,8 +94,10 @@ export default function VaporizeTextCycle({
   className,
 }: VaporizeTextCycleProps) {
   const safeTexts = texts.length > 0 ? texts : ['']
+  const rootRef = useRef<HTMLElement>(null)
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('entering')
+  const [inView, setInView] = useState(true)
 
   const vaporizeDuration = animation?.vaporizeDuration ?? 1.6
   const fadeInDuration = animation?.fadeInDuration ?? 0.7
@@ -103,9 +105,21 @@ export default function VaporizeTextCycle({
   const currentText = safeTexts[index % safeTexts.length]
   const chars = useMemo(() => Array.from(currentText), [currentText])
   const particlesPerChar = Math.max(1, Math.min(3, Math.round(density / 3)))
-  const TagName = tag as keyof JSX.IntrinsicElements
+  const TagName = tag as ElementType
+
+  // Fuera de pantalla el ciclo se pausa: no tiene sentido animar decenas de letras con blur que nadie ve
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return undefined
+
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
+    if (!inView) return undefined
+
     const timers: number[] = []
 
     if (phase === 'entering') {
@@ -126,10 +140,11 @@ export default function VaporizeTextCycle({
     }
 
     return () => timers.forEach((timer) => window.clearTimeout(timer))
-  }, [fadeInDuration, phase, safeTexts.length, vaporizeDuration, waitDuration])
+  }, [fadeInDuration, inView, phase, safeTexts.length, vaporizeDuration, waitDuration])
 
   return (
     <TagName
+      ref={rootRef}
       className={cn('relative block w-full overflow-visible leading-none', className)}
       style={{
         ...font,

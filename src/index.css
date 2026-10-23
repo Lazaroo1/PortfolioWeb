@@ -49,6 +49,29 @@ main {
   z-index: 1;
 }
 
+/* En pantallas táctiles (también teléfono horizontal) Safari hace zoom al tocar un input de menos de 16px */
+@media (pointer: coarse) {
+  .chatbot-shell textarea {
+    font-size: 16px;
+  }
+}
+
+/* Blackhole en pantalla completa (BlackHoleScene): sin scroll, sin navbar ni chat encima */
+html.blackhole-expanded,
+html.blackhole-expanded body {
+  overflow: hidden;
+}
+
+html.blackhole-expanded .site-navbar-shell,
+html.blackhole-expanded .chatbot-shell {
+  display: none;
+}
+
+/* La sección del blackhole queda encima de las demás (todas usan z-10); !important por su z-index inline */
+html.blackhole-expanded #about {
+  z-index: 60 !important;
+}
+
 canvas {
   z-index: -1;
 }

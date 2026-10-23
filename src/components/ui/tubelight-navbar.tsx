@@ -69,7 +69,7 @@ export function NavBar({ activeSection, className }: NavBarProps) {
               href={item.href}
               onClick={(e) => handleClick(e, item.href, item.name)}
               className={cn(
-                'relative cursor-pointer text-sm font-semibold px-5 py-2 rounded-full transition-colors duration-200 font-display',
+                'relative cursor-pointer whitespace-nowrap text-sm font-semibold px-5 py-2 rounded-full transition-colors duration-200 font-display',
                 'text-[#666] hover:text-[#e8e8e8]',
                 isActive && 'text-white',
               )}

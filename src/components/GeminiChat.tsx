@@ -24,8 +24,22 @@ function hasAny(value: string, words: string[]) {
   return words.some((word) => value.includes(word))
 }
 
+// El chat muestra texto plano: si el modelo igual manda Markdown, se quitan las marcas
+function toPlainText(reply: string) {
+  return reply
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[*•]\s+/gm, '- ')
+}
+
 function getLocalPortfolioAnswer(question: string) {
   const q = normalizeText(question)
+
+  // Va primero: "¿qué nivel de inglés tiene Lázaro?" también contiene "lazaro"
+  if (hasAny(q, ['ingles', 'english', 'idioma'])) {
+    return 'Lázaro habla español (nativo) e inglés a nivel C1, así que puede trabajar en equipos y con documentación en inglés.'
+  }
 
   if (hasAny(q, ['hola', 'buenas', 'hey', 'que onda', 'saludos'])) {
     return '¡Qué onda! Soy el asistente del portafolio de Lázaro. Pregúntame por sus proyectos, stack, experiencia, contacto o cómo está hecho este sitio.'
@@ -79,18 +93,19 @@ function getLocalPortfolioAnswer(question: string) {
   if (hasAny(q, ['proyecto', 'proyectos', 'portfolio', 'portafolio'])) {
     return [
       'Proyectos principales:',
-      '- Bodega de Licores: sistema empresarial full stack con Vue 3, Node.js, PostgreSQL, Clerk, Cloudflare R2, CI/CD y 316 tests Jest.',
+      '- Bodega de Licores: sistema en producción hecho en equipo con Vue 3, Node.js, PostgreSQL, Clerk, Cloudflare R2 y CI/CD.',
       '- OmniMarket: retail dashboard con React, PostgreSQL, SQL avanzado, transacciones ACID y reportes PDF.',
       '- MoodNutri: app Android con Kotlin, Jetpack Compose, Gemini API y OpenAI API.',
       '- Series Tracker: API REST en Go, SQLite, Swagger/OpenAPI y Docker/Railway.',
       '- RetailMax: dashboard analítico con PostgreSQL, Metabase, Docker y KPIs de negocio.',
+      '- Gargantua: agujero negro renderizado 100 % en CPU con Rust, geodésicas de Schwarzschild (RK4) y gas volumétrico.',
       '',
       'El más fuerte para mostrar ingeniería completa es Bodega de Licores; el más fuerte para datos es OmniMarket/RetailMax.',
     ].join('\n')
   }
 
   if (hasAny(q, ['bodega', 'licores'])) {
-    return 'Bodega de Licores es su proyecto full stack más robusto: backend por capas con Node.js, Express, Prisma y PostgreSQL; frontend en Vue 3 + Pinia; RBAC con Clerk; webhooks firmados con Svix; Cloudflare R2; automatización con node-cron; CI/CD con GitHub Actions y 316 pruebas en Jest.'
+    return 'Bodega de Licores es un sistema en producción desarrollado en equipo: backend por capas con Node.js, Express, Prisma y PostgreSQL; frontend en Vue 3 + Pinia; RBAC con Clerk; Cloudflare R2 y CI/CD con GitHub Actions. Lázaro tiene más de 330 commits: rediseño para teléfono y accesibilidad, el editor del carrusel y de ofertas, filtros del panel y la refactorización por capas del módulo /me.'
   }
 
   if (hasAny(q, ['omnimarket', 'retail'])) {
@@ -107,6 +122,10 @@ function getLocalPortfolioAnswer(question: string) {
 
   if (hasAny(q, ['retailmax', 'metabase', 'dashboard', 'bi', 'analytics'])) {
     return 'RetailMax es un dashboard de data analytics con PostgreSQL, Metabase y Docker. Expone KPIs de negocio como ingresos, canales, márgenes, regiones, crecimiento de clientes y recompra.'
+  }
+
+  if (hasAny(q, ['gargantua', 'rust', 'graficas', 'proyecto2-graf', 'endurance', 'interstellar'])) {
+    return 'Gargantua es su proyecto de Gráficas por Computadora: un agujero negro de Schwarzschild renderizado 100 % en CPU con Rust, sin librerías de gráficos ni de cálculo (solo minifb para la ventana). Integra geodésicas de luz con RK4, gas volumétrico con Doppler y corrimiento gravitacional, y una versión Endurance con la nave de Interstellar hecha con SDF, seis materiales con reflexión y refracción y render paralelo con hilos propios. Repo: https://github.com/Lazaroo1/Proyecto2-graf'
   }
 
   if (hasAny(q, ['blackhole', 'agujero negro', 'shader', 'webgl', 'raymarching', 'fondo', 'lineas'])) {
@@ -169,11 +188,15 @@ export default function GeminiChat() {
         if (data.error || data.details) {
           console.warn('Chat proxy fallback:', data.error, data.details)
         }
-        setMessages(prev => [...prev, { role: 'assistant', content: localAnswer }])
+        // Límite de mensajes del worker: se avisa y mientras tanto contesta la versión local
+        const content = response.status === 429
+          ? `Vas muy rápido; dame un minuto para volver a usar Gemini. Mientras tanto:\n\n${localAnswer}`
+          : localAnswer
+        setMessages(prev => [...prev, { role: 'assistant', content }])
         return
       }
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
+      setMessages(prev => [...prev, { role: 'assistant', content: toPlainText(reply) }])
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: localAnswer }])
     } finally {
@@ -217,7 +240,8 @@ export default function GeminiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="chatbot-shell fixed bottom-24 sm:bottom-8 right-6 z-[120] w-[340px] sm:w-[380px] h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            // En teléfono va a lo ancho y nunca más alto que la pantalla (si no, la X quedaba fuera)
+            className="chatbot-shell fixed left-3 right-3 bottom-3 sm:left-auto sm:right-6 sm:bottom-8 z-[120] sm:w-[380px] h-[min(500px,calc(100dvh_-_1.5rem))] sm:h-[min(500px,calc(100dvh_-_4rem))] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#161616] shrink-0">
@@ -294,7 +318,7 @@ export default function GeminiChat() {
                   <Send size={14} />
                 </button>
               </div>
-              <p className="font-mono text-[10px] text-white/15 text-center mt-2">
+              <p className="hidden sm:block font-mono text-[10px] text-white/15 text-center mt-2">
                 Enter para enviar · Shift+Enter para nueva línea
               </p>
             </div>

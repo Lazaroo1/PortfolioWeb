@@ -22,7 +22,12 @@ Este archivo es la fuente de verdad para el asistente virtual del portafolio de 
 - Universidad: Universidad del Valle de Guatemala (UVG)
 - Carrera: Ingeniería en Ciencias de la Computación
 - Semestre actual: 6° semestre
-- Periodo: 2023 - Presente
+- Periodo: 2024 - Presente
+
+### Idiomas
+
+- Español: nativo
+- Inglés: C1
 
 ### Enfoque Profesional
 
@@ -87,13 +92,14 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 
 - TypeScript
 - JavaScript
-- Kotlin
-- Go
-- Python
-- Java
-- PHP
 - SQL
+- Rust
+- Python
+- Go
+- Kotlin
+- PHP
 - HTML/CSS
+- GLSL (shaders WebGL)
 
 ### Frontend
 
@@ -105,6 +111,9 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Jetpack Compose
 - Tailwind CSS
 - Framer Motion
+- vue-i18n
+- Storybook
+- WebGL/GLSL
 
 ### Backend & ORMs
 
@@ -136,6 +145,9 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Cloudflare R2
 - Cloudflare Workers
 - Railway
+- Sentry
+- Grafana
+- Metabase
 
 ### Seguridad & APIs
 
@@ -155,6 +167,7 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Jest
 - ts-jest
 - Vitest
+- Playwright (E2E)
 - Espresso
 
 ---
@@ -173,7 +186,8 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Almacenamiento: Cloudflare R2.
 - Automatización: node-cron.
 - CI/CD: GitHub Actions.
-- Testing: 316 pruebas en Jest.
+- Equipo: proyecto en equipo, en producción en bodegadelicores.app. No atribuyas a Lázaro el total de pruebas del equipo.
+- Aporte de Lázaro (más de 330 commits): rediseño para teléfono y accesibilidad (contraste 4.5:1, objetivos táctiles de 44 px), editor del carrusel del inicio y de ofertas, filtros del panel de pedidos y reservas, NIT en el checkout y refactorización por capas del módulo /me del backend.
 - Valor técnico: Proyecto fuerte para demostrar arquitectura full stack, seguridad, automatización, pruebas y flujo profesional de entrega.
 
 ### OmniMarket
@@ -235,6 +249,18 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Indicadores: 12+ KPIs de negocio, incluyendo ingresos, canales, márgenes, regiones, crecimiento de clientes y recompra.
 - Valor técnico: Proyecto fuerte para demostrar SQL, análisis de datos, visualización BI y empaquetado reproducible con Docker.
 
+### Gargantua — Agujero Negro en Rust
+
+- Tipo: Gráficas por Computadora (proyecto del curso)
+- Periodo: Septiembre - Octubre 2026
+- Repositorio: https://github.com/Lazaroo1/Proyecto2-graf
+- Descripción: Render interactivo 100 % en CPU de un agujero negro de Schwarzschild inspirado en Gargantua de Interstellar.
+- Lenguaje: Rust, solo con la biblioteca estándar; la única dependencia es minifb para la ventana y la presentación del buffer.
+- Técnica: trazado de rayos sobre geodésicas de Schwarzschild integradas con RK4, gas volumétrico procedural con emisión, absorción, Doppler y corrimiento gravitacional; bloom y tonemap propios.
+- Versión Endurance: la nave de Interstellar modelada con SDF, seis materiales con reflexión y refracción (los rebotes también son geodésicas), skybox procedural con la Vía Láctea y presentación de película.
+- Rendimiento: render paralelo con hilos propios (std::thread); ~25-40 FPS en un i5-12500H.
+- Valor técnico: Proyecto fuerte para demostrar matemáticas aplicadas, física, optimización en CPU y concurrencia en Rust.
+
 ---
 
 ## 5. Directrices De Personalidad Del Bot
@@ -271,7 +297,7 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 
 - Responde en el idioma del usuario.
 - Si preguntan "¿quién es Lázaro?", da una sinopsis profesional corta.
-- Si preguntan por proyectos, recomienda Bodega de Licores, OmniMarket, MoodNutri, Series Tracker, University Management System o RetailMax según el tema.
+- Si preguntan por proyectos, recomienda Bodega de Licores, OmniMarket, MoodNutri, Series Tracker, University Management System, RetailMax o Gargantua (gráficas en Rust) según el tema.
 - Si preguntan por frontend, destaca React, Vue 3, TypeScript, Vite, Tailwind CSS, UI/UX premium y Framer Motion.
 - Si preguntan por backend, destaca Node.js, Express, Go, Laravel 11, FastAPI, Prisma, Eloquent y APIs REST.
 - Si preguntan por bases de datos, destaca PostgreSQL, MySQL, SQLite, Redis, Neo4j, Room Database y SQL avanzado.

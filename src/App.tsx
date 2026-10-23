@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { NavBar } from './components/ui/tubelight-navbar'
 import Hero from './components/sections/Hero'
@@ -7,6 +7,12 @@ import Projects from './components/sections/Projects'
 import Skills from './components/sections/Skills'
 import Contact from './components/sections/Contact'
 import GeminiChat from './components/GeminiChat'
+
+// Panel de diagnóstico para probar en el teléfono: solo en desarrollo y con ?debug en la URL
+const DevPerfOverlay =
+  import.meta.env.DEV && new URLSearchParams(window.location.search).has('debug')
+    ? lazy(() => import('./components/DevPerfOverlay'))
+    : null
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero')
@@ -46,6 +52,11 @@ export default function App() {
         <Contact />
       </main>
       <GeminiChat />
+      {DevPerfOverlay && (
+        <Suspense fallback={null}>
+          <DevPerfOverlay />
+        </Suspense>
+      )}
     </ThemeProvider>
   )
 }

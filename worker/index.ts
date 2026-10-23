@@ -1,9 +1,16 @@
 import portfolioContext from '../portfolio-context.md'
 
+// Binding de Rate Limiting de Workers (ver [[ratelimits]] en wrangler.toml)
+type RateLimiter = {
+  limit(options: { key: string }): Promise<{ success: boolean }>
+}
+
 type Env = {
   GEMINI_API_KEY: string
   ALLOWED_ORIGIN?: string
   GEMINI_MODEL?: string
+  CHAT_PER_IP?: RateLimiter
+  CHAT_GLOBAL?: RateLimiter
 }
 
 type ChatMessage = {
@@ -28,15 +35,13 @@ type GeminiResponse = {
   }
 }
 
-const LOCAL_DEV_ORIGINS = new Set([
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-])
+// Servidor de desarrollo: localhost en cualquier puerto y la red local (para probar desde el teléfono)
+const DEV_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/
 
 function getCorsHeaders(request: Request, env: Env) {
   const origin = request.headers.get('Origin') ?? ''
   const allowedOrigin = env.ALLOWED_ORIGIN || 'https://lazaroo1.github.io'
-  const allowOrigin = origin === allowedOrigin || LOCAL_DEV_ORIGINS.has(origin)
+  const allowOrigin = origin === allowedOrigin || DEV_ORIGIN.test(origin)
     ? origin
     : allowedOrigin
 
@@ -89,6 +94,7 @@ Instrucciones finales:
 - Responde siempre en el idioma del usuario.
 - No inventes proyectos, estudios ni experiencia.
 - Sé concreto: máximo 5 bullets o 2 párrafos cortos.
+- Escribe en texto plano: el chat no muestra Markdown, así que nada de asteriscos, almohadillas ni negritas. Para listas usa líneas que empiecen con "- ".
 - Si el usuario pregunta algo casual, responde breve y vuelve al perfil, proyectos o stack de Lázaro.
 - Si falta información, dilo y sugiere revisar GitHub, LinkedIn o contactar a Lázaro.`
 }
@@ -112,6 +118,20 @@ export default {
       return jsonResponse(
         { error: 'Missing GEMINI_API_KEY secret' },
         { status: 500, headers: corsHeaders },
+      )
+    }
+
+    // Por persona y en total, antes de gastar una llamada a Gemini. La IP es la única clave
+    // disponible en un chat anónimo; el límite general protege la cuota aunque muchos la compartan
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    const [perIp, global] = await Promise.all([
+      env.CHAT_PER_IP?.limit({ key: ip }) ?? { success: true },
+      env.CHAT_GLOBAL?.limit({ key: 'all' }) ?? { success: true },
+    ])
+    if (!perIp.success || !global.success) {
+      return jsonResponse(
+        { error: 'Too many requests' },
+        { status: 429, headers: { ...corsHeaders, 'Retry-After': '60' } },
       )
     }
 
@@ -148,18 +168,24 @@ export default {
             generationConfig: {
               temperature: 0.35,
               topP: 0.8,
-              maxOutputTokens: 420,
+              // En gemini-2.5-flash el razonamiento interno gasta del mismo límite de tokens y
+              // dejaba las respuestas cortadas a media frase; para un chat de portafolio no hace falta
+              maxOutputTokens: 800,
+              thinkingConfig: { thinkingBudget: 0 },
             },
           }),
         },
       )
 
       const data = await geminiResponse.json() as GeminiResponse
-      const reply = data.candidates
+      const text = data.candidates
         ?.flatMap(candidate => candidate.content?.parts ?? [])
         .map(part => part.text ?? '')
         .join('')
         .trim()
+      // Si aun así se corta, que se note que la respuesta sigue en vez de terminar a media palabra
+      const truncated = data.candidates?.[0]?.finishReason === 'MAX_TOKENS'
+      const reply = text && truncated ? `${text}…` : text
 
       if (!geminiResponse.ok || !reply) {
         return jsonResponse(

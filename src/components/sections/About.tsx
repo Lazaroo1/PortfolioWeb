@@ -1,34 +1,53 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, GraduationCap } from 'lucide-react'
-import { OWNER, STATS } from '@/data/portfolio'
+import { OWNER } from '@/data/portfolio'
 
 const BlackHoleScene = lazy(() => import('@/components/BlackHoleScene'))
 
-function CounterStat({ value, label }: { value: string; label: string }) {
-  const [visible, setVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+function BlackHolePlaceholder() {
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center rounded-2xl border border-white/[0.06]"
+      style={{ background: 'radial-gradient(ellipse at center, #0a0805 0%, #050505 60%, #000000 100%)' }}
+    >
+      <span className="font-mono text-xs text-white/20 animate-pulse">
+        initializing black hole…
+      </span>
+    </div>
+  )
+}
 
+function BlackHoleWindow() {
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [shouldMount, setShouldMount] = useState(false)
+
+  // El blackhole se monta (y compila sus shaders) cuando la sección está a una pantalla de distancia
   useEffect(() => {
+    const frame = frameRef.current
+    if (!frame) return undefined
+
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.5 }
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        setShouldMount(true)
+        observer.disconnect()
+      },
+      { rootMargin: '100% 0px' },
     )
-    if (ref.current) observer.observe(ref.current)
+    observer.observe(frame)
     return () => observer.disconnect()
   }, [])
 
   return (
-    <div ref={ref} className="text-center">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={visible ? { opacity: 1, scale: 1 } : {}}
-        transition={{ type: 'spring', stiffness: 200 }}
-        className="font-display text-3xl sm:text-4xl font-bold text-white mb-1"
-      >
-        {value}
-      </motion.div>
-      <div className="font-body text-sm text-[#666]">{label}</div>
+    <div ref={frameRef} className="relative aspect-[4/5] max-h-[80svh] w-full sm:aspect-video">
+      {shouldMount ? (
+        <Suspense fallback={<BlackHolePlaceholder />}>
+          <BlackHoleScene />
+        </Suspense>
+      ) : (
+        <BlackHolePlaceholder />
+      )}
     </div>
   )
 }
@@ -99,39 +118,19 @@ export default function About() {
           </div>
 
           {/* ── Black Hole Interactive Section ── */}
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 mb-16">
-            {STATS.map((stat) => (
-              <CounterStat key={stat.label} value={stat.value} label={stat.label} />
-            ))}
-          </div>
+          {/* Sale de la columna de texto: ventana de hasta ~1150px, 16:9 en desktop y 4:5 en teléfono */}
+          <div className="relative left-1/2 right-1/2 ml-[-50vw] mr-[-50vw] w-screen px-6">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="flex-1 h-px bg-white/[0.06]" />
+                <p className="font-mono text-[10px] text-white/25 uppercase tracking-widest">
+                  universo personal
+                </p>
+                <div className="flex-1 h-px bg-white/[0.06]" />
+              </div>
 
-          <div className="relative left-1/2 right-1/2 mb-0 ml-[-50vw] mr-[-50vw] w-screen">
-            <div className="mb-6 flex items-center gap-4">
-              <div className="flex-1 h-px bg-white/[0.06]" />
-              <p className="font-mono text-[10px] text-white/25 uppercase tracking-widest">
-                universo personal
-              </p>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+              <BlackHoleWindow />
             </div>
-
-            <div
-              className="relative w-full overflow-hidden"
-              style={{ background: 'radial-gradient(ellipse at center, #0a0805 0%, #050505 60%, #000000 100%)' }}
-            >
-              <Suspense
-                fallback={
-                  <div className="flex h-[100dvh] min-h-[640px] items-center justify-center">
-                    <span className="font-mono text-xs text-white/20 animate-pulse">
-                      initializing black hole…
-                    </span>
-                  </div>
-                }
-              >
-                <BlackHoleScene />
-              </Suspense>
-            </div>
-
           </div>
 
         </motion.div>

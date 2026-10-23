@@ -30,13 +30,6 @@ export const HERO_TEXTS = [
   'Builder',
 ]
 
-export const STATS = [
-  { value: '5+', label: 'Proyectos reales' },
-  { value: '316', label: 'Tests escritos' },
-  { value: '10+', label: 'Tecnologías' },
-  { value: 'B2', label: 'Inglés' },
-]
-
 export interface Project {
   title: string
   description: string
@@ -53,7 +46,7 @@ export const PROJECTS: Project[] = [
     title: 'Bodega de Licores',
     description:
       'Sistema empresarial completo para gestión de inventario, ventas y operaciones. ' +
-      'Arquitectura por capas, RBAC con Clerk, CI/CD y 316 tests Jest.',
+      'Sistema en producción hecho en equipo: arquitectura por capas, RBAC con Clerk y CI/CD.',
     year: '2026',
     tags: ['Node.js', 'TypeScript', 'Vue 3', 'PostgreSQL', 'Docker', 'GitHub Actions'],
     link: null,

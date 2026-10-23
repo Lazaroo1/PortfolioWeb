@@ -11,11 +11,11 @@ const PROJECTS_DATA: ProjectDetail[] = [
     title: 'Bodega de Licores',
     year: '2026',
     description:
-      'Sistema empresarial completo para gestión de inventario, ventas y operaciones de una bodega de licores.',
+      'Sistema en producción, hecho en equipo, para la gestión de inventario, ventas y pedidos de una bodega de licores de Quetzaltenango.',
     problem:
       'La bodega operaba con procesos manuales sin visibilidad en tiempo real de inventario, ventas ni movimientos de caja.',
     solution:
-      'Plataforma full stack con arquitectura por capas, RBAC con Clerk, CI/CD con GitHub Actions y 316 tests Jest ejecutados sin base de datos real.',
+      'Catálogo y carrito para clientes y panel administrativo por roles, en español e inglés. Mi parte: rediseño para teléfono y accesibilidad (contraste 4.5:1, botones de 44 px), editor del carrusel y de ofertas, filtros del panel de pedidos y la refactorización por capas del módulo /me en el backend.',
     tags: [
       'Node.js',
       'TypeScript',
@@ -33,9 +33,38 @@ const PROJECTS_DATA: ProjectDetail[] = [
     screenshots: [],
     isMobile: false,
     metrics: [
-      { label: 'Tests Jest', value: '316' },
-      { label: 'Cobertura', value: 'Full' },
-      { label: 'CI/CD', value: 'Auto' },
+      { label: 'En producción', value: 'Live' },
+      { label: 'Mis commits', value: '338' },
+      { label: 'Idiomas', value: 'ES/EN' },
+    ],
+  },
+  {
+    id: 6,
+    title: 'Gargantua',
+    year: '2026',
+    description:
+      'Agujero negro de Interstellar renderizado 100 % en CPU con Rust: trazado de rayos sobre geodésicas, gas volumétrico y la nave Endurance.',
+    problem:
+      'Proyecto de Gráficas por Computadora: simular la lente gravitacional de Gargantua en tiempo real, sin GPU ni librerías de gráficos o de cálculo.',
+    solution:
+      'Geodésicas de Schwarzschild integradas con RK4, gas volumétrico con Doppler y corrimiento gravitacional, nave con SDF y seis materiales con reflexión y refracción, y render paralelo con hilos propios.',
+    tags: ['Rust', 'std::thread', 'Ray tracing', 'RK4', 'SDF', 'minifb'],
+    link: 'https://github.com/Lazaroo1/Proyecto2-graf',
+    hasVideo: false,
+    screenshots: [
+      `${BASE}gargantua/gargantua-variante.mp4`,
+      `${BASE}gargantua/gargantua-endurance.mp4`,
+      `${BASE}gargantua/gargantua-nave.mp4`,
+      `${BASE}gargantua/gargantua-arriba.mp4`,
+      `${BASE}gargantua/gargantua-zoom.mp4`,
+      `${BASE}gargantua/gargantua-gas.mp4`,
+    ],
+    captions: ['Variante', 'Endurance', 'La nave de cerca', 'Desde arriba', 'Zoom hacia afuera', 'Gas animado'],
+    isMobile: false,
+    metrics: [
+      { label: 'Render', value: 'CPU' },
+      { label: 'Versiones', value: '3' },
+      { label: 'Líneas Rust', value: '7.4k' },
     ],
   },
   {
@@ -212,7 +241,7 @@ export default function Projects() {
                 }`}
               />
 
-              <div className="relative flex items-start justify-between gap-6">
+              <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                 <div className="min-w-0 flex-1">
                   <div className="mb-2 flex items-center gap-2">
                     <h3
@@ -222,7 +251,7 @@ export default function Projects() {
                     >
                       {project.title}
                     </h3>
-                    {project.hasVideo && (
+                    {(project.hasVideo || project.screenshots.some((src) => src.endsWith('.mp4'))) && (
                       <span className="flex items-center gap-1 rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-white/40">
                         <Play size={9} fill="currentColor" />
                         demo
@@ -236,6 +265,10 @@ export default function Projects() {
                           : '-translate-x-1 translate-y-1 opacity-0'
                       }`}
                     />
+                    {/* En teléfono el año va en la línea del título para dejarle todo el ancho a la descripción */}
+                    <span className="ml-auto shrink-0 font-mono text-xs text-white/20 sm:hidden">
+                      {project.year}
+                    </span>
                   </div>
 
                   <p className="mb-3 max-w-2xl font-body text-sm leading-relaxed text-white/40">
@@ -265,8 +298,12 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <div className="flex shrink-0 flex-col items-end gap-2 pt-0.5">
-                  <span className="font-mono text-xs text-white/20">{project.year}</span>
+                <div
+                  className={`shrink-0 items-end gap-2 pt-0.5 sm:flex sm:flex-col ${
+                    project.link ? 'flex' : 'hidden'
+                  }`}
+                >
+                  <span className="hidden font-mono text-xs text-white/20 sm:inline">{project.year}</span>
                   {project.link && (
                     <a
                       href={project.link}
