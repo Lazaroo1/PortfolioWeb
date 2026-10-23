@@ -41,6 +41,11 @@ function getLocalPortfolioAnswer(question: string) {
     return 'Lázaro habla español (nativo) e inglés a nivel C1, así que puede trabajar en equipos y con documentación en inglés.'
   }
 
+  // También antes del contacto: "¿por qué se mueven las ondas en el teléfono?" contiene "telefono"
+  if (hasAny(q, ['giroscop', 'gyro', 'inclin', 'ondas', 'sensor']) || (q.includes('fondo') && hasAny(q, ['muev', 'mover']))) {
+    return 'Las ondas del fondo reaccionan a ti: en la compu se doblan hacia el cursor del mouse y en el teléfono se mueven al inclinarlo, con el giroscopio. Funciona en la página publicada (HTTPS); en iPhone primero hay que tocar el botón "Mover el fondo con el teléfono" para dar permiso. Todo se calcula en tiempo real con un shader de WebGL.'
+  }
+
   if (hasAny(q, ['hola', 'buenas', 'hey', 'que onda', 'saludos'])) {
     return '¡Qué onda! Soy el asistente del portafolio de Lázaro. Pregúntame por sus proyectos, stack, experiencia, contacto o cómo está hecho este sitio.'
   }

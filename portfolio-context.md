@@ -59,6 +59,7 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - El portafolio está organizado en secciones claras: Inicio, Sobre mí, Proyectos, Skills y Contacto.
 - La navegación es fija y compacta.
 - Los proyectos se presentan con una estructura limpia, escaneable y orientada a decisiones técnicas.
+- Cada proyecto se abre en un modal con su video o capturas dentro de una ventana estilo Mac (la app Android MoodNutri se muestra en un teléfono estilo Galaxy S24 Ultra). Se pasa de un proyecto a otro con las flechas de abajo, con las flechas del teclado o, en teléfono, deslizando a los lados.
 - Las habilidades se agrupan en tarjetas con mini-chips mate individuales para cada tecnología.
 - La composición general toma ideas de layouts tipo Bento Grid y secciones asimétricas, pero sin convertir el sitio en una colección de demos desconectadas.
 
@@ -71,6 +72,12 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - Estas ondas forman bandas suaves que se mueven en bucle y dan una sensación de campo ondulatorio.
 - El fondo usa una paleta oscura con tonos gris, plateado y blanco suave para mantener una estética mate y técnica.
 - La intención visual es simular profundidad sobre un fondo oscuro, como una superficie orgánica y húmeda, sin usar texturas externas.
+- Las ondas reaccionan al usuario. En computadora se doblan suavemente hacia el cursor del mouse.
+- En teléfono se mueven con el giroscopio (el sensor de orientación del teléfono): al inclinarlo, las ondas se doblan hacia ese lado. La postura en que sostienes el teléfono cuenta como el centro, y se vuelve a centrar sola poco a poco si cambias de postura.
+- En teléfono el dedo no mueve las ondas, para que tocar botones y hacer scroll no se mezcle con la animación.
+- El navegador solo entrega los datos del giroscopio en páginas con HTTPS (el sitio publicado en GitHub Pages lo es). En iPhone, Safari pide permiso: aparece el botón "Mover el fondo con el teléfono" en el inicio, debajo de los botones principales.
+- Si el sistema tiene activado "reducir movimiento" (una opción de accesibilidad para personas a las que el movimiento en pantalla les marea), las ondas no reaccionan; no tiene que ver con la batería.
+- Para cuidar batería y rendimiento, en teléfono el fondo se dibuja a 30 fps, y se pausa mientras el blackhole está en pantalla completa o hay un proyecto abierto; al volver sigue justo donde se quedó.
 
 ### Render Central - Blackhole
 
@@ -83,6 +90,9 @@ Lázaro es un desarrollador full stack con enfoque fuerte en frontend engineerin
 - El disco de acreción se genera con funciones de distancia, ruido procedural y acumulación de color.
 - El bloom se genera con un pipeline multi-pass usando framebuffers, blur horizontal, blur vertical y composición final.
 - La escena también contiene planetas interactivos que abren modales con información personal y técnica.
+- Vive en una ventana dentro de la sección "Sobre mí", con un botón para verlo en pantalla completa.
+- Ajusta su calidad solo según el dispositivo: primero baja a 30 fps antes que bajar la resolución, y cuando calcula menos rayos que píxeles combina varios cuadros (acumulación temporal) para verse nítido en vez de pixelado.
+- Se pausa cuando no está en pantalla y continúa donde se quedó.
 
 ---
 
